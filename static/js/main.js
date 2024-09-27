@@ -11,7 +11,13 @@ function showContacts(contacts) {
             <a href="${contact.url}">${contact.name}</a>
           </th>
           <td>
+            ${contact.degree}
+          </td>
+          <td>
             ${contact.description}
+          </td>
+          <td>
+            ${contact.followers}
           </td>
           <td>
             ${contact.id}

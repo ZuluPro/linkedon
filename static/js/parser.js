@@ -18,7 +18,7 @@ browser.storage.local.get().then(function (storedData) {
     storage = storedData;
 })
 
-function parsePeople() {
+function parseFeed() {
     var contacts_tags = document.getElementsByClassName('update-components-actor__container');
     for (let i = contacts_tags.length-1; i > -1; i--) {
         var contact = contacts_tags[i];
@@ -52,6 +52,38 @@ function parsePeople() {
     browser.storage.local.set(storage);
 }
 
+function parsePerson() {
+    var id = document.URL.slice(28).replace('/', '');
+    var contact = storage['lk_contacts'][id];
+    contact.longName = $('h1').text().trim();
+    contact.verified = Boolean($('[href="#verified-medium"]').length);
+    contact.img = $('img.pv-top-card-profile-picture__image--show')[0].src;
+    contact.description = $('.text-body-medium').text().trim();
+
+    $('span.t-bold').each(function (t) {
+        var text = this.parentElement.textContent.trim();
+        if (text.includes('followers')) {
+            contact.followers = text.split(' ')[0].replace(',', '');
+        }
+    });
+    $('.distance-badge span.visually-hidden').each(function (t) {
+        var text = this.parentElement.textContent.trim();
+        if (text.includes('degree connection')) {
+            contact.degree = text.split(' ')[0];
+        }
+    });
+    if (! contact.name) {
+        contact.name = contact.longName
+    }
+    storage['lk_contacts'][id] = contact;
+    browser.storage.local.set(storage);
+}
+
 addEventListener("scrollend", (event) => {
-    parsePeople()
+    if (document.URL == "https://www.linkedin.com/feed/") {
+        parseFeed()
+    }
+    if (document.URL.startsWith('https://www.linkedin.com/in/')) {
+        parsePerson()
+    }
 });
