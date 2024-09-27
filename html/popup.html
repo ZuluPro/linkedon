@@ -1,11 +1,18 @@
 <!DOCTYPE html>
 <html>
   <head>
-      <title>Tab Content Reader</title>
+    <title>Live Linkedin</title>
+    <link type="text/css" rel="stylesheet" href="/static/css/bootstrap.css" />
   </head>
   <body>
-    <button id="contactBtn">View</button>
-    <button id="contactDownloadBtn">CSV</button>
+    <div class="list-group">
+      <div id="homeBtn" class="list-group-item list-group-item-action active">Live Linkedin</div>
+      <div class="list-group-item list-group-item-action">
+        <span id="contactBtn">Contacts</span>
+        <button id="contactDownloadBtn">CSV</button>
+      </div>
+      <div id="companyBtn" class="list-group-item list-group-item-action">Companies</div>
+    </div>
     <script src="/static/js/popup.js"></script>
   </body>
 </html>

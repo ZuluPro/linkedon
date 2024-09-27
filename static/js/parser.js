@@ -1,16 +1,23 @@
 let defaultStorage = {
   lk_contacts: {},
+  lk_companies: {},
 };
 
 function onError(e) {
   console.error(e);
 }
 
-function checkStoredSettings(storedSettings) {
-  if (!storedSettings.lk_contacts) {
-      browser.storage.local.set(defaultStorage);
-      storage = storedSettings;
+function checkStoredSettings(storage) {
+  if (!storage.lk_contacts) {
+	  storage.lk_contacts = {};
+	  storage.lk_contact_aliases = {};
   }
+  if (!storage.lk_companies) {
+	  storage.lk_companies = {};
+	  storage.lk_company_aliases = {};
+  }
+  browser.storage.local.set(storage);
+  storage = storage;
 }
 
 browser.storage.local.get().then(checkStoredSettings, onError);
@@ -33,7 +40,6 @@ function parseFeed() {
                 'id': id,
                 "url": url,
             };
-            console.log('Added ' + id);
         }
         var name = $(contact).find('.update-components-actor__name span span')[0].textContent
         var image_url = $(contact).find('img')[0].src;
@@ -54,29 +60,67 @@ function parseFeed() {
 
 function parsePerson() {
     var id = document.URL.slice(28).replace('/', '');
-    var contact = storage['lk_contacts'][id];
-    contact.longName = $('h1').text().trim();
-    contact.verified = Boolean($('[href="#verified-medium"]').length);
-    contact.img = $('img.pv-top-card-profile-picture__image--show')[0].src;
-    contact.description = $('.text-body-medium').text().trim();
+    browser.storage.local.get().then(function (storage) {
+		var contact = storage['lk_contacts'][id];
+		var longName = $('h1').text().trim();
+		if (! contact) {
+			contact = {id: id, name: longName};
+		}
+		contact.url = document.URL;
+		contact.longName = longName;
+		contact.verified = Boolean($('[href="#verified-medium"]').length);
+		contact.img = $('img.pv-top-card-profile-picture__image--show')[0].src;
+		contact.description = $('.text-body-medium').text().trim();
 
-    $('span.t-bold').each(function (t) {
-        var text = this.parentElement.textContent.trim();
-        if (text.includes('followers')) {
-            contact.followers = text.split(' ')[0].replace(',', '');
-        }
-    });
-    $('.distance-badge span.visually-hidden').each(function (t) {
-        var text = this.parentElement.textContent.trim();
-        if (text.includes('degree connection')) {
-            contact.degree = text.split(' ')[0];
-        }
-    });
-    if (! contact.name) {
-        contact.name = contact.longName
-    }
-    storage['lk_contacts'][id] = contact;
-    browser.storage.local.set(storage);
+		$('span.t-bold').each(function (t) {
+			var text = this.parentElement.textContent.trim();
+			if (text.includes('followers')) {
+				contact.followers = text.split(' ')[0].replace(',', '');
+			}
+		});
+		$('.distance-badge span.visually-hidden').each(function (t) {
+			var text = this.parentElement.textContent.trim();
+			if (text.includes('degree connection')) {
+				contact.degree = text.split(' ')[0];
+			}
+		});
+		if (! contact.name) {
+			contact.name = contact.longName
+		}
+		storage['lk_contacts'][id] = contact;
+		browser.storage.local.set(storage);
+
+		var currentCompanyName = $('button[aria-label^="Current company: "]')[0].textContent.trim()
+		$('a[data-field="experience_company_logo"].optional-action-target-wrapper').each(function(i) {
+			var companyTag = this;
+			if (! companyTag.href.startsWith('https://www.linkedin.com/company/')) {
+				return
+			}
+			var companyUrl = companyTag.href;
+			var companyId = companyUrl.slice(33).replace('/', '');
+			var company = {};
+			if (! (companyId in storage.lk_companies)) {
+				company = {id: companyId, url: companyUrl};
+			} else {
+				company = storage.lk_companies[companyId];
+			}
+			company = {
+				id: companyId,
+				url: companyUrl,
+			};
+			imgTag = $(companyTag).find('img')[0];
+			if (imgTag) company.img = imgTag.src;
+			if ($(companyTag).parent().parent().text().trim().includes(currentCompanyName)) company.name = currentCompanyName;
+
+			storage.lk_companies[companyId] = company;
+			browser.storage.local.set(storage);
+		});
+	})
+}
+
+function parseSocialReactor() {
+    debugger
+    var contact_href = document.URL.slice(28).replace('/', '');
 }
 
 addEventListener("scrollend", (event) => {
@@ -85,5 +129,8 @@ addEventListener("scrollend", (event) => {
     }
     if (document.URL.startsWith('https://www.linkedin.com/in/')) {
         parsePerson()
+    }
+    if (document.URL.startsWith('https://www.linkedin.com/feed/update/urn:li:activity:')) {
+        parseSocialReactor()
     }
 });
