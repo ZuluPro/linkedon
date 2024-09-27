@@ -1,7 +1,7 @@
 // Context Menu aka Right click
 browser.contextMenus.create({
   id: "show-lk-contacts",
-  title: "Show Linkedin contacts",
+  title: "Show Live Linkedin",
 });
 
 browser.contextMenus.onClicked.addListener((info, tab) => {
