@@ -1,27 +1,62 @@
-let defaultStorage = {
-  lk_contacts: {},
-  lk_companies: {},
-};
-
 function onError(e) {
   console.error(e);
 }
 
 function checkStoredSettings(storage) {
-  if (!storage.lk_contacts) {
-	  storage.lk_contacts = {};
-	  storage.lk_contact_aliases = {};
-	  browser.storage.local.set(storage);
-  }
-  if (!storage.lk_companies) {
-	  storage.lk_companies = {};
-	  storage.lk_company_aliases = {};
-	  browser.storage.local.set(storage);
-  }
+  var default_keys = [
+    "lk_contacts",
+    "lk_contact_aliases",
+    "lk_tmp_contact_aliases",
+    "lk_companies",
+    "lk_company_aliases",
+    "lk_tmp_company_aliases",
+  ];
+  default_keys.map(function(key) {
+      if (!storage[key]) {
+          console.log("Created table " + key)
+          storage[key] = {};
+      }
+  })
+  browser.storage.local.set(storage);
 }
 
 browser.storage.local.get().then(checkStoredSettings, onError);
 
+
+function cleanContactAliases() {
+  browser.storage.local.get().then(function(storage) {
+    console.log(`Solving ${storage.lk_tmp_contact_aliases.length} alias(es)`);
+    for (var id in storage.lk_tmp_contact_aliases) {
+      var alias = storage.lk_tmp_contact_aliases[id]
+      var contact = null;
+      // Solve by name
+      if ('name' in alias) {
+        for (var contactId in storage.lk_contacts) {
+          tmpContact = storage.lk_contacts[contactId];
+          if (tmpContact.name == alias.name) {
+              contact = tmpContact;
+              break
+          }
+        }
+      }
+      if (contact == null) {
+        console.log(`Cannot solve alias ${alias.id} (${alias.name})`);
+        continue 
+      }
+
+      if (!contact.tagLine && alias.tagLine) contact.tagLine = alias.tagLine
+      if (!contact.degree && alias.degree) contact.degree = alias.degree
+      if (!contact.aliases) contact.aliases = [];
+      if (!contact.aliases.includes(id)) contact.aliases.push(id);
+
+      storage.lk_contacts[contact.id] = contact;
+      storage.lk_contact_aliases[id] = contact.id;
+      delete storage.lk_tmp_contact_aliases[id];
+
+	  browser.storage.local.set(storage);
+    }
+  });
+}
 
 function parseFeed() {
     var contacts_tags = document.getElementsByClassName('update-components-actor__container');
@@ -182,7 +217,6 @@ function parseCompany() {
 
 const seenCommentators = [];
 function parseComments() {
-	var idsDone = [];
     browser.storage.local.get().then(function (storage) {
 	  contactTags = $('.comments-comments-list .comments-comment-meta__actor');
 	  contactTags.each(function(i) {
@@ -229,6 +263,39 @@ function parseComments() {
   })
 }
 
+function parseReactors() {
+  var reactorTags = $('.social-details-reactors-modal .link-without-hover-state')
+  browser.storage.local.get().then(function (storage) {
+    reactorTags.each(function(i) {
+      var url = this.href;
+      var aliasId = url.split('/in/')[1];
+
+      var alias = null;
+      if (aliasId in storage.lk_tmp_contact_aliases) {
+        alias = storage.lk_tmp_contact_aliases[aliasId];
+      } else {
+        alias = {
+            id: aliasId,
+            url: url,
+        };
+      }
+
+      this.id = aliasId
+      var aliasTag = $(`#${this.id}`);
+      alias.name = aliasTag.find('.artdeco-entity-lockup__title .text-view-model').text().trim();
+      alias.degree = aliasTag.find('.artdeco-entity-lockup__badge').text().trim().split(' ')[0];
+      alias.tagLine = aliasTag.find('.artdeco-entity-lockup__caption').text().trim();
+	  
+	  var imgTag = aliasTag.find('img.ivm-view-attr__img--centered')[0]
+      if (imgTag) alias.img = imgTag.src;
+
+      storage.lk_tmp_contact_aliases[aliasId] = alias;
+    });
+    browser.storage.local.set(storage);
+  });
+  cleanContactAliases();
+}
+
 addEventListener("scrollend", (event) => {
     if (document.URL == "https://www.linkedin.com/feed/") {
         parseFeed()
@@ -239,7 +306,8 @@ addEventListener("scrollend", (event) => {
     }
     if (document.URL.startsWith('https://www.linkedin.com/feed/update/urn:li:activity:')) {
         // parseSocialReactor()
-        parseComments()
+        parseComments();
+        parseReactors();
     }
     if (document.URL.startsWith('https://www.linkedin.com/company/')) {
         parseComments()

@@ -26,6 +26,7 @@ function showContacts(contacts) {
           </td>
           <td>
             ${contact.id}
+            ${(contact.aliases || []).join(" ")}
           </td>
       `;
       table.children[1].appendChild(trTag);
