@@ -6,7 +6,8 @@ function showContacts(contacts, storage) {
 
       var trTag = document.createElement("tr");
       trTag.id = id;
-      trTag.innerHTML = `
+	  // Base
+      trContent = `
           <th>
 			<a href="${contact.url}" target="_blank">
               <img src="${contact.img}" height="64">
@@ -24,26 +25,42 @@ function showContacts(contacts, storage) {
             ${contact.tagLine || contact.description || ""}
           </td>
 	  `
+	  // Company
+      trContent += '<td>';
 	  if (contact.currentCompany) {
-	    trTag.innerHTML = trTag.innerHTML + `
-            <td>
+	    trContent += `
 			  <a href="https://www.linkedin.com/company/${contact.currentCompany}" target="_blank">
                 <img src="${contact.currentCompanyLogo}" height="64" alt="${contact.currentCompany || ""}">
 			  </a>
-            </td>
-	    `
-	  } else {
-	    trTag.innerHTML = trTag.innerHTML + '<td></td>'
+	    `;
 	  }
-	  trTag.innerHTML = trTag.innerHTML + `
-          <td>
-            ${contact.followers || ""}
-          </td>
-          <td>
-            ${contact.id}
-            ${(contact.aliases || []).join(" ")}
-          </td>
-      `;
+      trContent += '</td>';
+
+      // Followers
+	  trContent += `<td>${contact.followers || ""}</td>`;
+
+	  // Contact
+      trContent += '<td>';
+	  if (contact.email) {
+	    trContent += `<a class="badge text-bg-primary" href="mailto:${contact.email}">${contact.email}</a>`
+	  }
+	  if (contact.phone_mobile) {
+	    trContent += `<a class="badge text-bg-primary" href="tel:${contact.phone_mobile}">Mobile: ${contact.phone_mobile}</a>`
+	  }
+	  if (contact.phone) {
+	    trContent += `<a href="tel:${contact.phone}">${contact.phone}</a>`
+	  }
+      trContent += '</td>';
+
+	  // ID
+      trContent += '<td>';
+      trContent += `ID:${contact.id}`;
+	  trContent += `${(contact.aliases || []).join(" ")}`;
+      trContent += '</td>';
+	  trTag.innerHTML = trContent
+		console.log(trTag.innerHTML)
+			// <button onclick="deleteContact(${contact.id})">x</button>
+
       table.children[1].appendChild(trTag);
       // document.getElementById("contactCount").innerHTML = `${contacts.length} contacts`
     }

@@ -101,14 +101,14 @@ function parseFeed() {
 }
 
 function parsePerson() {
-    var id = document.URL.slice(28).replace('/', '');
+    var id = document.URL.slice(28).replace('/overlay/contact-info/', '').replace('/', '');
     browser.storage.local.get().then(function (storage) {
 		var contact = storage['lk_contacts'][id];
-		var longName = $('h1').text().trim();
+		var longName = $('h1.text-heading-xlarge')[0].textContent.trim();
 		if (! contact) {
 			contact = {id: id, name: longName};
 		}
-		contact.url = document.URL;
+		contact.url = document.URL.replace('/overlay/contact-info/', '').split('?')[0];
 		contact.longName = longName;
 		contact.verified = Boolean($('[href="#verified-medium"]').length);
 		contact.img = $('img.pv-top-card-profile-picture__image--show')[0].src;
@@ -129,7 +129,23 @@ function parsePerson() {
 		if (! contact.name) {
 			contact.name = contact.longName
 		}
-		storage['lk_contacts'][id] = contact;
+
+		$('.artdeco-modal .pv-contact-info__contact-type').each(function(i) {
+		  this.id = i;
+		  var fieldTag = $(this);
+		  var fieldText = this.textContent.trim();
+		  if (fieldText.startsWith("Phone")) {
+			  if (fieldText.includes('Mobile')) {
+			    contact.phone_mobile = fieldTag.find('.t-normal').text().trim().split(" ")[0];
+			  } else {
+			    contact.phone = fieldTag.find('.t-normal').text().trim().split(" ")[0].trim();
+			  }
+		  } else if (this.textContent.trim().startsWith('Email')) {
+			  contact.email = $(this).find('a')[0].href.replace('mailto:', '')
+		  }
+		});
+
+		storage.lk_contacts[id] = contact;
 		browser.storage.local.set(storage);
 
 		var currentCompanyName = $('button[aria-label^="Current company: "]')[0].textContent.trim()
