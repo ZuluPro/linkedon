@@ -360,6 +360,45 @@ function parseSearchPeople() {
   });
 }
 
+const seenNetworkConnection = []
+function parseMyNetworkConnection() {
+  var contactTags = $('.mn-connection-card');
+  browser.storage.local.get().then(function (storage) {
+    contactTags.each(function(i) {
+	  var contentTag = $(this);
+	  var aTag = contentTag.find('a')[0];
+      var shortUrl = aTag.href;
+      var id = shortUrl.split('/in/')[1].replace('/', '');
+      var url = aTag.href;
+	  if (! url.startsWith('https://')) url = 'https://www.linkedin.com' + shortUrl;
+
+      if (seenNetworkConnection.includes(id)) return
+
+      var contact = null;
+      if (id in storage.lk_contacts) {
+        contact = storage.lk_contacts[id];
+	    contact.url = url
+      } else {
+        contact = {
+            id: id,
+            url: url,
+			relations: [],
+        };
+      }
+
+	  contact.name = contentTag.find('.mn-connection-card__name').text().trim();
+	  contact.tagLine = contentTag.find('.mn-connection-card__occupation').text().trim();
+	  contact.degree = "1st";
+      var imgTag = contentTag.find('img');
+	  if (imgTag.length) contact.img = imgTag[0].src;
+
+	  seenNetworkConnection.push(id)
+	  storage.lk_contacts[id] = contact;
+	});
+    browser.storage.local.set(storage);
+  });
+}
+
 addEventListener("scrollend", (event) => {
     if (document.URL == "https://www.linkedin.com/feed/") {
         parseFeed()
@@ -381,5 +420,8 @@ addEventListener("scrollend", (event) => {
     }
     if (document.URL.startsWith('https://www.linkedin.com/search/results/people/')) {
         parseSearchPeople()
+    }
+    if (document.URL.startsWith('https://www.linkedin.com/mynetwork/invite-connect/connections/')) {
+        parseMyNetworkConnection()
     }
 });
