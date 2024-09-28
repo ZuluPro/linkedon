@@ -11,19 +11,17 @@ function checkStoredSettings(storage) {
   if (!storage.lk_contacts) {
 	  storage.lk_contacts = {};
 	  storage.lk_contact_aliases = {};
+	  browser.storage.local.set(storage);
   }
   if (!storage.lk_companies) {
 	  storage.lk_companies = {};
 	  storage.lk_company_aliases = {};
+	  browser.storage.local.set(storage);
   }
-  browser.storage.local.set(storage);
-  storage = storage;
 }
 
 browser.storage.local.get().then(checkStoredSettings, onError);
-browser.storage.local.get().then(function (storedData) {
-    storage = storedData;
-})
+
 
 function parseFeed() {
     var contacts_tags = document.getElementsByClassName('update-components-actor__container');
@@ -35,27 +33,29 @@ function parseFeed() {
         }
         var url = href.split('?')[0];
         var id = url.split('/in/')[1];
-        if (! (id in storage['lk_contacts'])) {
-            storage['lk_contacts'][id] = {
-                'id': id,
-                "url": url,
-            };
-        }
-        var name = $(contact).find('.update-components-actor__name span span')[0].textContent
-        var image_url = $(contact).find('img')[0].src;
-        var degree = $(contact).find('.update-components-actor__supplementary-actor-info')[0].textContent.replace(" • ", ""); 
-        var desc = $(contact).find('.update-components-actor__description')[0].children[0].textContent.trim();
-        var new_details = {
-            'id': id,
-            "name": name,
-            "url": url,
-            'img': image_url,
-            // "degree": degree,
-            "description": desc,
-        };
-        storage['lk_contacts'][id] = new_details
+        browser.storage.local.get().then(function (storage) {
+          if (! (id in storage['lk_contacts'])) {
+              storage['lk_contacts'][id] = {
+                  'id': id,
+                  "url": url,
+              };
+          }
+          var name = $(contact).find('.update-components-actor__name span span')[0].textContent
+          var image_url = $(contact).find('img')[0].src;
+          var degree = $(contact).find('.update-components-actor__supplementary-actor-info')[0].textContent.replace(" • ", ""); 
+          var desc = $(contact).find('.update-components-actor__description')[0].children[0].textContent.trim();
+          var new_details = {
+              'id': id,
+              "name": name,
+              "url": url,
+              'img': image_url,
+              // "degree": degree,
+              "description": desc,
+          };
+          storage['lk_contacts'][id] = new_details
+          browser.storage.local.set(storage);
+		});
     }
-    browser.storage.local.set(storage);
 }
 
 function parsePerson() {
@@ -177,22 +177,74 @@ function parseCompany() {
 
 	  });
 	  browser.storage.local.set(storage);
-	  debugger;
 	});
 }
 
+const seenCommentators = [];
+function parseComments() {
+	var idsDone = [];
+    browser.storage.local.get().then(function (storage) {
+	  contactTags = $('.comments-comments-list .comments-comment-meta__actor');
+	  contactTags.each(function(i) {
+	  var tag = this;
+      var aTag = tag.querySelector('a.app-aware-link');
+      var url = aTag.href;
+      if (!url.includes('/in')) return
+      
+      var id = url.split('/in/')[1];
+      if (seenCommentators.includes(id)) return
+      this.id = id.replace(/[^a-zA-Z0-9 ]/g, '-')
+      
+      var contactTag = $(`#${this.id}`);
+
+	  var contact = null;
+      if (! (id in storage.lk_contacts)) {
+          contact = {
+              id: id,
+              url: url,
+          };
+      } else {
+          contact = storage.lk_contacts[id]
+	  }
+
+	  if (! contact.img) {
+	  	contact.img = contactTag.find('img')[0].src;
+	  }
+
+	  if (! contact.name) {
+	  	contact.name = contactTag.find('h3')[0].textContent.trim();
+	  }
+
+	  if (! contact.tagLine) {
+	  	var tagLine = contactTag.find('.comments-comment-meta__description-subtitle')[0].textContent.trim();
+	  	if (! tagLine.includes('...')) {
+	  		contact.tagLine = contactTag.find('.comments-comment-meta__description-subtitle')[0].textContent.trim();
+	  		if (! contact.description) contact.description = contact.tagLine
+	  	}
+	  }
+	  storage.lk_contacts[id] = contact
+	  seenCommentators.push(id);
+	  browser.storage.local.set(storage);
+    })
+  })
+}
 
 addEventListener("scrollend", (event) => {
     if (document.URL == "https://www.linkedin.com/feed/") {
         parseFeed()
+        parseComments()
     }
     if (document.URL.startsWith('https://www.linkedin.com/in/')) {
         parsePerson()
     }
     if (document.URL.startsWith('https://www.linkedin.com/feed/update/urn:li:activity:')) {
-        parseSocialReactor()
+        // parseSocialReactor()
+        parseComments()
     }
     if (document.URL.startsWith('https://www.linkedin.com/company/')) {
+        parseComments()
+    }
+    if (document.URL.startsWith('https://www.linkedin.com/posts/')) {
         parseCompany()
     }
 });
