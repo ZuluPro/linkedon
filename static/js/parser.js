@@ -59,38 +59,45 @@ function cleanContactAliases() {
 }
 
 function parseFeed() {
-    var contacts_tags = document.getElementsByClassName('update-components-actor__container');
-    for (let i = contacts_tags.length-1; i > -1; i--) {
-        var contact = contacts_tags[i];
-        var href = $(contact).find('a.app-aware-link')[0].href;
+    var contactsTags = $('.update-components-actor__container');
+	browser.storage.local.get().then(function (storage) {
+      for (let i = contactsTags.length-1; i > -1; i--) {
+        var contactEle = contactsTags[i];
+        contactEle.id = i;
+		var contactTag = $(`#${contactEle.id}`);
+		  console.log(contactTag);
+        var href = contactTag.find('a.app-aware-link')[0].href;
         if (! href.startsWith("https://www.linkedin.com/in/")) {
             continue
         }
         var url = href.split('?')[0];
         var id = url.split('/in/')[1];
-        browser.storage.local.get().then(function (storage) {
-          if (! (id in storage['lk_contacts'])) {
-              storage['lk_contacts'][id] = {
-                  'id': id,
-                  "url": url,
-              };
-          }
-          var name = $(contact).find('.update-components-actor__name span span')[0].textContent
-          var image_url = $(contact).find('img')[0].src;
-          var degree = $(contact).find('.update-components-actor__supplementary-actor-info')[0].textContent.replace(" • ", ""); 
-          var desc = $(contact).find('.update-components-actor__description')[0].children[0].textContent.trim();
-          var new_details = {
-              'id': id,
-              "name": name,
-              "url": url,
-              'img': image_url,
-              // "degree": degree,
-              "description": desc,
-          };
-          storage['lk_contacts'][id] = new_details
-          browser.storage.local.set(storage);
-		});
-    }
+		var contact = null;
+        if (id in storage.lk_contacts) {
+			contact = storage.lk_contacts[id];
+		} else {
+            contact = {
+                'id': id,
+                "url": url,
+            };
+        }
+        var name = contactTag.find('.update-components-actor__name span span')[0].textContent
+        var image_url = contactTag.find('img')[0].src;
+        // var degree = $(contact).find('.update-components-actor__supplementary-actor-info')[0].textContent.replace(" • ", ""); 
+        var desc = contactTag.find('.update-components-actor__description')[0].children[0].textContent.trim();
+        contact = {
+			"id": id,
+            "name": name,
+            'img': image_url,
+			'url': url,
+            // "degree": degree,
+            "description": desc,
+        };
+        storage.lk_contacts[id] = contact
+		  console.log(contact)
+        browser.storage.local.set(storage);
+      }
+	});
 }
 
 function parsePerson() {
@@ -321,7 +328,7 @@ function parseSearchPeople() {
       var tagLine = contentTag.find('.entity-result__primary-subtitle').text().trim();
 	  if (! tagLine.includes('...')) contact.tagLine = tagLine
       var imgTag = contentTag.find('img');
-	  if (imgTag) contact.img = imgTag[0].src;
+	  if (imgTag.length) contact.img = imgTag[0].src;
 	  if (! contact.relations) contact.relations = [];
 
 	  var urlParams = new URLSearchParams(document.URL.split('?')[1]);
@@ -340,6 +347,12 @@ function parseSearchPeople() {
 	  new_connections.map(function(conn) {
 		  if (! contact.relations.includes(conn)) contact.relations.push(conn);
 	  });
+
+	  var currentCompany = urlParams.get('currentCompany');
+	  if (currentCompany) {
+		currentCompany = JSON.parse(currentCompany);
+		if (currentCompany.length == 1) contact.currentCompany = currentCompany
+	  }
 
 	  storage.lk_contacts[id] = contact;
 	})

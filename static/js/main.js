@@ -1,7 +1,9 @@
-function showContacts(contacts) {
+function showContacts(contacts, storage) {
     var table = document.getElementById("contactTable");
     for (var id in contacts) {
       var contact = contacts[id];
+      contact.currentCompanyLogo = getCompanyLogo(contact.currentCompany, storage);
+
       var trTag = document.createElement("tr");
       trTag.id = id;
       trTag.innerHTML = `
@@ -21,6 +23,19 @@ function showContacts(contacts) {
           <td>
             ${contact.tagLine || contact.description || ""}
           </td>
+	  `
+	  if (contact.currentCompany) {
+	    trTag.innerHTML = trTag.innerHTML + `
+            <td>
+			  <a href="https://www.linkedin.com/company/${contact.currentCompany}" target="_blank">
+                <img src="${contact.currentCompanyLogo}" height="64" alt="${contact.currentCompany || ""}">
+			  </a>
+            </td>
+	    `
+	  } else {
+	    trTag.innerHTML = trTag.innerHTML + '<td></td>'
+	  }
+	  trTag.innerHTML = trTag.innerHTML + `
           <td>
             ${contact.followers || ""}
           </td>
@@ -70,12 +85,23 @@ function showCompanies(companies) {
       // document.getElementById("companyCount").innerHTML = `${companies.length} companies`
     }
 }
+function getCompanyLogo(id, storage) {
+  var company = storage.lk_companies[id]
+  if (!company) return ''
+  return company.img;
+}
+
+function deleteContact(id) {
+  browser.storage.local.get().then(function (storage) {
+	delete storage.lk_contacts[id];
+  });
+}
 
 browser.storage.local.get().then(function (storage) {
 	console.log(storage.lk_companies);
 	if (document.URL.endsWith('contacts.html')) {
-		showContacts(storage.lk_contacts);
+		showContacts(storage.lk_contacts, storage);
 	} else if (document.URL.endsWith('companies.html')){
-		showCompanies(storage.lk_companies);
+		showCompanies(storage.lk_companies, storage);
 	}
 })
