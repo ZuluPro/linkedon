@@ -19,7 +19,7 @@ function showContacts(contacts) {
             ${contact.degree || ""}
           </td>
           <td>
-            ${contact.description || ""}
+            ${contact.tagLine || contact.description || ""}
           </td>
           <td>
             ${contact.followers || ""}

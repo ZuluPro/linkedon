@@ -296,6 +296,57 @@ function parseReactors() {
   cleanContactAliases();
 }
 
+function parseSearchPeople() {
+  contactTags = $('[data-view-name="search-entity-result-universal-template"]');
+  browser.storage.local.get().then(function (storage) {
+    contactTags.each(function(i) {
+	  var contentTag = $(this);
+	  var aTag = contentTag.find('a.app-aware-link')[0];
+      var url = aTag.href;
+      var id = url.split('?')[0].split('/in/')[1];
+
+      var contact = null;
+      if (id in storage.lk_contacts) {
+        contact = storage.lk_contacts[id];
+      } else {
+        contact = {
+            id: id,
+            url: url,
+			relations: [],
+        };
+      }
+
+      contact.name = contentTag.find('.entity-result__title-line a.app-aware-link [aria-hidden="true"]')[0].textContent.trim();
+      contact.degree = contentTag.find('.entity-result__badge .visually-hidden')[0].textContent.trim().split(' ')[0];
+      var tagLine = contentTag.find('.entity-result__primary-subtitle').text().trim();
+	  if (! tagLine.includes('...')) contact.tagLine = tagLine
+      var imgTag = contentTag.find('img');
+	  if (imgTag) contact.img = imgTag[0].src;
+	  if (! contact.relations) contact.relations = [];
+
+	  var urlParams = new URLSearchParams(document.URL.split('?')[1]);
+	  var new_connections = [];
+
+	  var facetConnection = urlParams.get('facetConnectionOf');
+	  if (facetConnection) {
+		facetConnection = JSON.parse(facetConnection);
+		new_connections.push(facetConnection);
+	  }
+	  var connectionOf = urlParams.get('connectionOf');
+	  if (connectionOf) {
+		connectionOf = JSON.parse(connectionOf);
+		new_connections = new_connections.concat(connectionOf);
+	  }
+	  new_connections.map(function(conn) {
+		  if (! contact.relations.includes(conn)) contact.relations.push(conn);
+	  });
+
+	  storage.lk_contacts[id] = contact;
+	})
+    browser.storage.local.set(storage);
+  });
+}
+
 addEventListener("scrollend", (event) => {
     if (document.URL == "https://www.linkedin.com/feed/") {
         parseFeed()
@@ -314,5 +365,8 @@ addEventListener("scrollend", (event) => {
     }
     if (document.URL.startsWith('https://www.linkedin.com/posts/')) {
         parseCompany()
+    }
+    if (document.URL.startsWith('https://www.linkedin.com/search/results/people/')) {
+        parseSearchPeople()
     }
 });
