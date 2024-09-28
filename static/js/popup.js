@@ -33,6 +33,13 @@ function downloadCompanyCsv() {
     downloadBlob(blob, 'companies.csv');
   })
 }
+function downloadStorage() {
+  browser.storage.local.get().then(function (storage) {
+	var json = JSON.stringify(storage); 
+    var blob = new Blob([json], { type: 'application/json' });
+    downloadBlob(blob, 'live-likedin.json');
+  });
+}
 
 // document.getElementById("homeBtn").addEventListener("click", () => {
 //   browser.tabs.create({url: '/html/home.html' });
@@ -49,4 +56,7 @@ document.getElementById("contactDownloadBtn").addEventListener("click", () => {
 });
 document.getElementById("companyDownloadBtn").addEventListener("click", () => {
 	downloadCompanyCsv();
+});
+document.getElementById("backupBtn").addEventListener("click", () => {
+	downloadStorage();
 });
