@@ -136,7 +136,7 @@ function parsePerson() {
 		  var fieldText = this.textContent.trim();
 		  if (fieldText.startsWith("Phone")) {
 			  if (fieldText.includes('Mobile')) {
-			    contact.phone_mobile = fieldTag.find('.t-normal').text().trim().split(" ")[0];
+			    contact.phoneMobile = fieldTag.find('.t-normal').text().trim().split(" ")[0];
 			  } else {
 			    contact.phone = fieldTag.find('.t-normal').text().trim().split(" ")[0].trim();
 			  }

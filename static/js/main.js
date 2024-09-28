@@ -44,8 +44,8 @@ function showContacts(contacts, storage) {
 	  if (contact.email) {
 	    trContent += `<a class="badge text-bg-primary" href="mailto:${contact.email}">${contact.email}</a>`
 	  }
-	  if (contact.phone_mobile) {
-	    trContent += `<a class="badge text-bg-primary" href="tel:${contact.phone_mobile}">Mobile: ${contact.phone_mobile}</a>`
+	  if (contact.phoneMobile) {
+	    trContent += `<a class="badge text-bg-primary" href="tel:${contact.phoneMobile}">Mobile: ${contact.phoneMobile}</a>`
 	  }
 	  if (contact.phone) {
 	    trContent += `<a href="tel:${contact.phone}">${contact.phone}</a>`

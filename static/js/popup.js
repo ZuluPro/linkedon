@@ -11,10 +11,10 @@ function downloadBlob(blob, filename) {
 }
 function downloadContactCsv() {
   browser.storage.local.get().then(function (storage) {
-    var csvData = "ID,Name,Description,URL\n";
+    var csvData = "ID;Name;Description;URL;Email;Phone;Mobile phone\n";
     for (var id in storage.lk_contacts) {
       var contact = storage.lk_contacts[id];
-      var row = `${contact.id},"${contact.name}","${contact.description || ''}",${contact.url}\n`;
+      var row = `${contact.id};"${contact.name.replace('"' ,'')}";"${(contact.description || '').replace('"' ,'')}";${contact.url};${contact.email || ''};${contact.phone || ''};${contact.phoneMobile || ''}\n`;
       csvData = csvData + row;
     }
     var blob = new Blob([csvData], { type: 'text/csv;charset=utf-8' });
@@ -26,7 +26,7 @@ function downloadCompanyCsv() {
     var csvData = "ID,Name,Description,URL\n";
     for (var id in storage.lk_companies) {
       var contact = storage.lk_companies[id];
-      var row = `${contact.id},"${contact.name}","${contact.description || ''}",${contact.url}\n`;
+      var row = `${contact.id},"${contact.name}","${contact.description.replace('"', '') || ''}",${contact.url}\n`;
       csvData = csvData + row;
     }
     var blob = new Blob([csvData], { type: 'text/csv;charset=utf-8' });
