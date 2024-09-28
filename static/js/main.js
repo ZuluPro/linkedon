@@ -50,13 +50,19 @@ function showCompanies(companies) {
 			</a>
           </th>
           <td>
-            ${company.description || ""}
+            ${company.tagLine || ""}
+          </td>
+          <td>
+            ${company.employees || ""}
           </td>
           <td>
             ${company.followers || ""}
           </td>
           <td>
             ${company.id}
+          </td>
+          <td>
+            <a href="${company.companyUrl}">Site</a>
           </td>
       `;
       table.children[1].appendChild(trTag);

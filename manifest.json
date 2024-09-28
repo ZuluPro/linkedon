@@ -5,6 +5,7 @@
 
   "description": "Reads Linkedin tabs to fill a DB.",
   "permissions": [
+    "tabs",
     "activeTab",
 	"contextMenus",
 	"storage",
@@ -18,7 +19,8 @@
 
   "background": {
     "scripts": [
-	  "static/js/background.js"
+	  "static/js/background.js",
+	  "static/js/parser.js"
 	]
   },
 

@@ -123,6 +123,65 @@ function parseSocialReactor() {
     var contact_href = document.URL.slice(28).replace('/', '');
 }
 
+function parseCompany() {
+	const reg = /urn:li:fsd_company:(\d*)/g ;
+	var companyIds = [...document.body.textContent.matchAll(reg)].map(function(i) {return i[1]});
+	const counter = {};
+	companyIds.forEach(ele => {
+	    if (counter[ele]) {
+			counter[ele] += 1;
+		} else {
+			counter[ele] = 1;
+		}
+	});
+	let id = null;
+	let highestValue = -Infinity;
+	for (const key in counter) {
+	  if (counter[key] > highestValue) {
+        id = key;
+	    highestValue = counter[key];
+      }
+	}
+
+	if (!id) return
+
+    var url = document.URL;
+	var alias = url.slice(33).replace('/', '');
+
+    browser.storage.local.get().then(function (storage) {
+	  if (! (id in storage.lk_companies)) {
+	  	company = {id: id, url: url};
+	  } else {
+	  	company = storage.lk_companies[id];
+	  }
+
+	  storage.lk_company_aliases[alias] = {id: id};
+	  company.img = $(".org-top-card-primary-content__logo-container img")[0].src 
+	  company.name = $('h1').text().trim();
+	  
+	  var tagLine = $('.org-top-card-summary__tagline').text().trim();
+	  if (tagLine) company.tagLine = tagLine
+
+      urlTag = $('.org-contact-info__content a.link-without-visited-state')[0];
+	  if (urlTag) {
+	    company.companyUrl = urlTag.href.split('?')[0]
+	  }
+
+	  $(".org-top-card-summary-info-list__info-item").each(function (i) {
+	    var text = this.textContent.trim();
+	    if (text.includes("followers")) {
+	      company.followers = text.split(" ")[0];
+	    } else if (text.includes("employee")) {
+	      company.employees = text.split(" ")[0];
+	    }
+
+	  });
+	  browser.storage.local.set(storage);
+	  debugger;
+	});
+}
+
+
 addEventListener("scrollend", (event) => {
     if (document.URL == "https://www.linkedin.com/feed/") {
         parseFeed()
@@ -132,5 +191,8 @@ addEventListener("scrollend", (event) => {
     }
     if (document.URL.startsWith('https://www.linkedin.com/feed/update/urn:li:activity:')) {
         parseSocialReactor()
+    }
+    if (document.URL.startsWith('https://www.linkedin.com/company/')) {
+        parseCompany()
     }
 });
