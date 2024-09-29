@@ -1,85 +1,3 @@
-function showContacts(contacts, storage) {
-    var table = document.getElementById("contactTable");
-    for (var id in contacts) {
-      var contact = contacts[id];
-      contact.currentCompanyLogo = getCompanyLogo(contact.currentCompany, storage);
-
-      var trTag = document.createElement("tr");
-      trTag.id = id;
-	  // ID
-      trContent = ''
-      trContent = `
-          <th>
-			<a href="${contact.url}" target="_blank">
-              <img src="${contact.img}" height="64">
-			</a>
-          </th>
-	  `
-	  // Name
-      trContent += '<th>'
-      trContent += `<a href="${contact.url}" target="_blank">${contact.name}</a>`
-	  if (contact.topVoice) {
-        trContent += `<span class="badge text-bg-warning">Top Voice</span>`
-	  }
-	  if (contact.premium) {
-        trContent += `<span class="badge text-bg-warning">Premium</span>`
-	  }
-	  if (contact.verified) {
-        trContent += `<span class="badge text-bg-secondary">Verified</span>`
-	  }
-      trContent += '</th>'
-	  // Degree
-      trContent += '<td>'
-      trContent += `${contact.degree || ""}`
-	  if (contact.connectedSince) {
-        trContent += '<br>'
-        trContent += `<small>${contact.connectedSince.toISOString().slice(0, 10)}</small>`
-	  }
-      trContent += '</td>'
-	  // TagLine
-	  var tagLine = contact.tagLine || contact.description || "";
-	  if (tagLine.length > 300) tagLine = tagLine.slice(0, 300) + "..."
-      trContent += `<td>${tagLine}</td>`
-	  // Company
-      trContent += '<td>';
-	  if (contact.currentCompany) {
-	    trContent += `
-			  <a href="https://www.linkedin.com/company/${contact.currentCompany}" target="_blank">
-                <img src="${contact.currentCompanyLogo}" height="64" alt="${contact.currentCompany || ""}">
-			  </a>
-	    `;
-	  }
-      trContent += '</td>';
-
-      // Followers
-	  trContent += `<td>${contact.followers || ""}</td>`;
-
-	  // Contact
-      trContent += '<td>';
-	  if (contact.email) {
-	    trContent += `<a class="badge text-bg-primary" href="mailto:${contact.email}">${contact.email}</a>`
-	  }
-	  if (contact.phoneMobile) {
-	    trContent += `<a class="badge text-bg-primary" href="tel:${contact.phoneMobile}">Mobile: ${contact.phoneMobile}</a>`
-	  }
-	  if (contact.phone) {
-	    trContent += `<a class="badge text-bg-primary" href="tel:${contact.phone}">${contact.phone}</a>`
-	  }
-      trContent += '</td>';
-
-	  // ID
-      trContent += '<td>';
-      trContent += `ID:${contact.id}`;
-	  trContent += `${(contact.aliases || []).join(" ")}`;
-      trContent += '</td>';
-	  trTag.innerHTML = trContent
-		console.log(trTag.innerHTML)
-			// <button onclick="deleteContact(${contact.id})">x</button>
-
-      table.children[1].appendChild(trTag);
-      // document.getElementById("contactCount").innerHTML = `${contacts.length} contacts`
-    }
-}
 function showCompanies(companies) {
     var table = document.getElementById("companiesTable");
     for (var id in companies) {
@@ -117,23 +35,40 @@ function showCompanies(companies) {
       // document.getElementById("companyCount").innerHTML = `${companies.length} companies`
     }
 }
+
 function getCompanyLogo(id, storage) {
   var company = storage.lk_companies[id]
   if (!company) return ''
   return company.img;
 }
 
-function deleteContact(id) {
-  browser.storage.local.get().then(function (storage) {
-	delete storage.lk_contacts[id];
-  });
-}
-
+// Display at startup
 browser.storage.local.get().then(function (storage) {
-	console.log(storage.lk_companies);
-	if (document.URL.endsWith('contacts.html')) {
-		showContacts(storage.lk_contacts, storage);
-	} else if (document.URL.endsWith('companies.html')){
+	var url = document.URL.split('?')[0]
+	if (url.endsWith('companies.html')){
 		showCompanies(storage.lk_companies, storage);
 	}
 })
+
+// Function to handle window scrolling and update the sticky header class
+function handleScroll() {
+    const tableHeader = document.querySelector('.table thead');
+    const navbarHeight = document.querySelector('.navbar').offsetHeight;
+
+	var newOffset = Math.round(navbarHeight + window.scrollY - 83);
+	console.log(newOffset, window.scrollY)
+
+		tableHeader.style.setProperty('top', `${newOffset}px`)
+    // if (tableHeader.getBoundingClientRect().top < window.screen.height ) {
+    if (window.scrollY > 300) {
+        tableHeader.classList.add('sticky-header');
+		console.log('+')
+    } else {
+        tableHeader.classList.remove('sticky-header');
+		tableHeader.style.removeProperty('top');
+		console.log('-')
+    }
+}
+
+// Add event listener for window scrolling
+window.addEventListener('scroll', handleScroll);

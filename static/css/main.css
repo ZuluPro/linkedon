@@ -1,5 +1,9 @@
-body {
-  background: #0C0909;
+.table thead {
+    position: relative;
 }
-table {
+
+.table thead.sticky-header {
+    position: sticky;
+    z-index: 10; /* Adjust z-index if needed */
+    background-color: #fff; /* Match table header background */
 }

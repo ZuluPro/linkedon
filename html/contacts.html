@@ -1,17 +1,65 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Contacts</title>
+    <title>Contacts - LinkedOn</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <link type="text/css" rel="stylesheet" href="/static/css/bootstrap.css" />
+    <link type="text/css" rel="stylesheet" href="/static/css/bootstrap-icons.css" />
     <link type="text/css" rel="stylesheet" href="/static/css/main.css" />
   </head>
 
-  <body>
+  <body class="bg-dark">
     <div id="app">
+
+      <nav class="navbar bg-body-tertiary sticky-top bg-dark navbar-expand-lg" data-bs-theme="dark">
+        <div class="container-fluid">
+
+          <a class="navbar-brand" href="#">
+            <img src="/static/img/icon256.png" alt="LinkedOn" width="30" height="30" class="d-inline-block align-text-top">
+
+          </a>
+
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+              <a class="nav-link active" aria-current="page" href="#">Contact</a>
+              <a class="nav-link" aria-current="page" href="/html/companies.html">Companies</a>
+            </div>
+          </div>
+
+          <form id="navForm" class="d-flex" role="search">
+
+            <div class="form-check form-switch">
+              <input name="topVoice" class="form-check-input" type="checkbox" role="switch" id="filterTopVoice">
+              <label class="form-check-label text-light" for="filterTopVoice">Only <i class="bi bi-megaphone"></i></label>
+            </div>
+
+            <div class="form-check form-switch">
+              <input name="premium" class="form-check-input" type="checkbox" role="switch" id="filterPremium">
+              <label class="form-check-label text-light" for="filterPremium">Only <i class="bi bi-linkedin"></i></label>
+            </div>
+
+            <div class="form-check form-switch">
+              <input name="verified" class="form-check-input" type="checkbox" role="switch" id="filterVerified">
+              <label class="form-check-label text-light" for="filterVerified">Only <i class="bi bi-shield-check"></i></label>
+            </div>
+
+            <div class="input-group">
+              <input name="text" type="text" class="form-control" placeholder="Search text" aria-label="Text">
+            </div>
+          </form>
+        </div>
+      </nav>
+
       <p id="contactCount"></p>
-      <table id="contactTable" class="table table-sm">
+
+      <div class="table-responsive">
+      <table id="contactTable" class="table table-sm table-striped table-dark ">
         <thead>
           <tr>
             <th></th>
@@ -26,9 +74,13 @@
         </thead>
         <tbody></tbody>
       </table>
+      </div>
     </div>
 
+    <script src="/static/js/jquery.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
     <script src="/static/js/main.js"></script>
+    <script src="/static/js/contact.js"></script>
 
   </body>
 </html>
