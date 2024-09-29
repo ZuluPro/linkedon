@@ -6,25 +6,37 @@ function showContacts(contacts, storage) {
 
       var trTag = document.createElement("tr");
       trTag.id = id;
-	  // Base
+	  // ID
+      trContent = ''
       trContent = `
           <th>
 			<a href="${contact.url}" target="_blank">
               <img src="${contact.img}" height="64">
 			</a>
           </th>
-          <th>
-            <a href="${contact.url}" target="_blank">
-			  ${contact.name}
-			</a>
-          </th>
-          <td>
-            ${contact.degree || ""}
-          </td>
-          <td>
-            ${contact.tagLine || contact.description || ""}
-          </td>
 	  `
+	  // Name
+      trContent += '<th>'
+      trContent += `<a href="${contact.url}" target="_blank">${contact.name}</a>`
+	  if (contact.topVoice) {
+        trContent += `<span class="badge text-bg-warning">Top Voice</span>`
+	  }
+	  if (contact.premium) {
+        trContent += `<span class="badge text-bg-warning">Premium</span>`
+	  }
+      trContent += '</th>'
+	  // Degree
+      trContent += '<td>'
+      trContent += `${contact.degree || ""}`
+	  if (contact.connectedSince) {
+        trContent += '<br>'
+        trContent += `<small>${contact.connectedSince.toISOString().slice(0, 10)}</small>`
+	  }
+      trContent += '</td>'
+	  // TagLine
+	  var tagLine = contact.tagLine || contact.description || "";
+	  if (tagLine.length > 300) tagLine = tagLine.slice(0, 300) + "..."
+      trContent += `<td>${tagLine}</td>`
 	  // Company
       trContent += '<td>';
 	  if (contact.currentCompany) {

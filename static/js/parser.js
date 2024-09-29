@@ -113,6 +113,8 @@ function parsePerson() {
 		contact.verified = Boolean($('[href="#verified-medium"]').length);
 		contact.img = $('img.pv-top-card-profile-picture__image--show')[0].src;
 		contact.description = $('.text-body-medium').text().trim();
+		contact.topVoice = Boolean($('.pv-top-voice-badge__icon').length);
+		contact.premium = Boolean($('.pv-member-badge').length);
 
 		$('span.t-bold').each(function (t) {
 			var text = this.parentElement.textContent.trim();
@@ -136,43 +138,56 @@ function parsePerson() {
 		  var fieldText = this.textContent.trim();
 		  if (fieldText.startsWith("Phone")) {
 			  if (fieldText.includes('Mobile')) {
-			    contact.phoneMobile = fieldTag.find('.t-normal').text().trim().split(" ")[0];
+			    contact.phoneMobile = fieldTag.find('.t-normal').text().split("(Mobile")[0].trim();
+			  } else if (fieldText.includes('Work')) {
+			    contact.phoneMobile = fieldTag.find('.t-normal').text().split("(Work")[0].trim();
 			  } else {
 			    contact.phone = fieldTag.find('.t-normal').text().trim().split(" ")[0].trim();
 			  }
-		  } else if (this.textContent.trim().startsWith('Email')) {
+		  } else if (fieldText.startsWith('Email')) {
 			  contact.email = $(this).find('a')[0].href.replace('mailto:', '')
+		  } else if (fieldText.startsWith('Connected')) {
+			  rawDate = $(this).find('span').text().trim();
+			  contact.connectedSince = new Date(Date.parse(rawDate));
 		  }
 		});
 
 		storage.lk_contacts[id] = contact;
-		browser.storage.local.set(storage);
 
-		var currentCompanyName = $('button[aria-label^="Current company: "]')[0].textContent.trim()
+		var currentCompanyName = $('button[aria-label^="Current company: "]')[0].textContent.trim();
+		contact.currentCompanyName = currentCompanyName;
+
 		$('a[data-field="experience_company_logo"].optional-action-target-wrapper').each(function(i) {
-			var companyTag = this;
-			if (! companyTag.href.startsWith('https://www.linkedin.com/company/')) {
+			var companyEle = this;
+			if (! companyEle.href.startsWith('https://www.linkedin.com/company/')) {
 				return
 			}
-			var companyUrl = companyTag.href;
+			var companyUrl = companyEle.href;
 			var companyId = companyUrl.slice(33).replace('/', '');
-			var company = {};
+
+			var company = null;
 			if (! (companyId in storage.lk_companies)) {
 				company = {id: companyId, url: companyUrl};
 			} else {
 				company = storage.lk_companies[companyId];
 			}
-			company = {
-				id: companyId,
-				url: companyUrl,
-			};
-			imgTag = $(companyTag).find('img')[0];
+			companyEle.id = companyId;
+			var companyTag = $(companyEle);
+			imgTag = companyTag.find('img')[0];
 			if (imgTag) company.img = imgTag.src;
-			if ($(companyTag).parent().parent().text().trim().includes(currentCompanyName)) company.name = currentCompanyName;
+			var liTag = companyTag.parents()[2]
+			if (liTag.textContent.includes(currentCompanyName)) {
+				company.name = currentCompanyName;
+				contact.currentCompany = companyId;
+				if (imgTag) contact.currentCompanyLogo = imgTag.src;
+				storage.lk_contacts[id] = contact;
+			}
 
 			storage.lk_companies[companyId] = company;
 			browser.storage.local.set(storage);
+
 		});
+		browser.storage.local.set(storage);
 	})
 }
 
@@ -204,7 +219,7 @@ function parseCompany() {
 	if (!id) return
 
     var url = document.URL;
-	var alias = url.slice(33).replace('/', '');
+	var alias = url.slice(33).split('/')[0];
 
     browser.storage.local.get().then(function (storage) {
 	  if (! (id in storage.lk_companies)) {
@@ -214,7 +229,7 @@ function parseCompany() {
 	  }
 
 	  storage.lk_company_aliases[alias] = {id: id};
-	  company.img = $(".org-top-card-primary-content__logo-container img")[0].src 
+	  company.img = $(".org-top-card-primary-content__logo-container img")[0].src.split('?')[0] 
 	  company.name = $('h1').text().trim();
 	  
 	  var tagLine = $('.org-top-card-summary__tagline').text().trim();
@@ -236,6 +251,57 @@ function parseCompany() {
 	  });
 	  browser.storage.local.set(storage);
 	});
+}
+
+const seenCompanyPeople = []
+
+function parseCompanyPeople() {
+  var url = document.URL;
+  var aliasId = url.slice(33).split('/')[0];
+
+  browser.storage.local.get().then(function (storage) {
+    if (! (aliasId in storage.lk_company_aliases)) return
+    var companyId = storage.lk_company_aliases[aliasId].id;
+
+    if (! (companyId in storage.lk_companies)) return
+    var company = storage.lk_companies[companyId];
+
+	var contactTags = $('.org-people-profile-card__profile-card-spacing');
+    contactTags.each(function(i) {
+	  this.id = i;
+	  var contentTag = $(`#${i}`);
+	  var aTag = contentTag.find('a')[0];
+	  var contactUrl = aTag.href.split('?')[0];
+	  var contactId = contactUrl.split('/in/')[1];
+
+      if (seenCompanyPeople.includes(contactId)) return
+
+	  var contact = null;
+      if (! (contactId in storage.lk_contacts)) {
+          contact = {
+              id: contactId,
+              url: contactUrl,
+          };
+      } else {
+          contact = storage.lk_contacts[contactId]
+	  }
+
+	  contact.currentCompany = companyId;
+	  contact.currentCompanyLogo = company.img;
+	  contact.name = contentTag.find('.artdeco-entity-lockup__title').text().trim();
+	  contact.degree = contentTag.find('.artdeco-entity-lockup__degree').text().trim().split('·')[1].trim();
+	  
+	  var tagLine = contentTag.find('.artdeco-entity-lockup__subtitle').text().trim();
+	  if (! tagLine.includes('...')) contact.tagLine = tagLine;
+
+	  var imgTag = contentTag.find('.app-aware-link img.ember-view')[0];
+      if (imgTag && imgTag.src.startsWith('http')) contact.img = imgTag.src;
+
+	  storage.lk_contacts[contactId] = contact;
+	  seenCompanyPeople.push(contactId);
+	});
+    browser.storage.local.set(storage);
+  });
 }
 
 const seenCommentators = [];
@@ -429,7 +495,13 @@ addEventListener("scrollend", (event) => {
         parseReactors();
     }
     if (document.URL.startsWith('https://www.linkedin.com/company/')) {
-        parseComments()
+        parseCompany()
+    }
+    if (
+	  document.URL.startsWith('https://www.linkedin.com/company/') &&
+	  document.URL.endsWith('/people/')
+	) {
+        parseCompanyPeople()
     }
     if (document.URL.startsWith('https://www.linkedin.com/posts/')) {
         parseCompany()
