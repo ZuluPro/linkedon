@@ -24,6 +24,9 @@ function showContacts(contacts, storage) {
 	  if (contact.premium) {
         trContent += `<span class="badge text-bg-warning">Premium</span>`
 	  }
+	  if (contact.verified) {
+        trContent += `<span class="badge text-bg-secondary">Verified</span>`
+	  }
       trContent += '</th>'
 	  // Degree
       trContent += '<td>'

@@ -195,6 +195,11 @@ function parsePerson() {
 			if (rawTextStart.startsWith('Activity')) {
 				var followers = sectionTag.find('.pvs-header__optional-link').text().trim().split(" ")[0].replace(',', '');
 				contact.followers = followers;
+			} else if (rawTextStart.startsWith('About')) {
+				if (! rawTextStart.endsWith('see more')) {
+					var text = sectionTag.find('.full-width span[aria-hidden="true"]').text().trim();
+					contact.description = text;
+				}
 			}
 
 			browser.storage.local.set(storage);
