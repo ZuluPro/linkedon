@@ -1,5 +1,6 @@
-function getContacts(storage, filter) {
+function getContacts(storage, filter, order) {
   var filter = filter || {}
+  var order = order || {}
   var contacts = []
   
   for (var id in storage.lk_contacts) {
@@ -32,6 +33,27 @@ function getContacts(storage, filter) {
 
 	  if (keep) contacts.push(contact);
   }
+  
+  var orderKeys = ['followers', 'degree', 'name']
+  for (var keyId in orderKeys) {
+    var key = orderKeys[keyId];
+      console.log(key, order)
+      console.log(key in order)
+    if (! (key in order)) continue
+    contacts = contacts.sort(function(a, b) {
+      var sort = order[key];
+      var valA = a[key];
+      var valB = b[key];
+      if (key == 'followers' && sort == "+") return Math.round(valA || 0) - Math.round(valB || 0)
+      if (key == 'followers' && sort == "-") return Math.round(valB || 0) - Math.round(valA || 0)
+      if (key == 'degree' && sort == "+") return (valA || '5rd').localeCompare(valB || '5rd')
+      if (key == 'degree' && sort == "-") return (valB || '5rd').localeCompare(valA || '5rd')
+      if (key == 'name' && sort == "+") return valA.localeCompare(valB)
+      if (key == 'name' && sort == "-") return valB.localeCompare(valA)
+      return a[key] - a[key];
+    });
+  }
+
   return contacts
 }
 
@@ -183,7 +205,7 @@ function updateContacts() {
   window.history.pushState(newUrl, "Contacts", newUrl)
   // Do the job
   browser.storage.local.get().then(function (storage) {
-	var contacts = getContacts(storage, filter);
+	var contacts = getContacts(storage, filter, order);
 	showContacts(contacts, storage);
   })
 }
@@ -201,12 +223,30 @@ for (var i in checkboxKeys) {
 	filter[key] = true;
   }
 }
+const order = {};
+
 // Display triggers
 $('#navForm input').on('keyup', function (e) {
   updateContacts();
 });
 $('#navForm input[type="checkbox"]').on('change', function (e) {
   updateContacts();
+});
+
+// Order
+$('.tableSorter').on('click', function (e) {
+    var key = this.dataset.field;
+    var value = this.dataset.order;
+    if (value == '+') {
+      value = '-';
+    } else if (value == '-') {
+      value = '+';
+    } else {
+      value = '+';
+    }
+    order[key] = value;
+    this.dataset.order = value;
+    updateContacts();
 });
 
 // Display at startup
