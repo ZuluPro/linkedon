@@ -63,7 +63,7 @@ function showContacts(contacts, storage) {
 	    trContent += `<a class="badge text-bg-primary" href="tel:${contact.phoneMobile}">Mobile: ${contact.phoneMobile}</a>`
 	  }
 	  if (contact.phone) {
-	    trContent += `<a href="tel:${contact.phone}">${contact.phone}</a>`
+	    trContent += `<a class="badge text-bg-primary" href="tel:${contact.phone}">${contact.phone}</a>`
 	  }
       trContent += '</td>';
 

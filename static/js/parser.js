@@ -1,3 +1,15 @@
+function findCompanyByName(name, storage) {
+  var company = null;
+  for (var id in storage.lk_companies) {
+    var found = name == storage.lk_companies[id].name
+    if (found) {
+  	  company = storage.lk_companies[id]
+  	  break
+     }
+  }
+  return company
+}
+
 function onError(e) {
   console.error(e);
 }
@@ -28,6 +40,9 @@ function cleanContactAliases() {
     console.log(`Solving ${storage.lk_tmp_contact_aliases.length} alias(es)`);
     for (var id in storage.lk_tmp_contact_aliases) {
       var alias = storage.lk_tmp_contact_aliases[id]
+
+      if (! alias) continue
+
       var contact = null;
       // Solve by name
       if ('name' in alias) {
@@ -65,7 +80,6 @@ function parseFeed() {
         var contactEle = contactsTags[i];
         contactEle.id = i;
 		var contactTag = $(`#${contactEle.id}`);
-		  console.log(contactTag);
         var href = contactTag.find('a.app-aware-link')[0].href;
         if (! href.startsWith("https://www.linkedin.com/in/")) {
             continue
@@ -94,14 +108,13 @@ function parseFeed() {
             "description": desc,
         };
         storage.lk_contacts[id] = contact
-		  console.log(contact)
         browser.storage.local.set(storage);
       }
 	});
 }
 
 function parsePerson() {
-    var id = document.URL.slice(28).replace('/overlay/contact-info/', '').replace('/', '');
+    var id = decodeURIComponent(document.URL.slice(28).replace('/overlay/contact-info/', '').replace('/', ''));
     browser.storage.local.get().then(function (storage) {
 		var contact = storage['lk_contacts'][id];
 		var longName = $('h1.text-heading-xlarge')[0].textContent.trim();
@@ -154,8 +167,12 @@ function parsePerson() {
 
 		storage.lk_contacts[id] = contact;
 
-		var currentCompanyName = $('button[aria-label^="Current company: "]')[0].textContent.trim();
-		contact.currentCompanyName = currentCompanyName;
+		var currentCompanyTag = $('button[aria-label^="Current company: "]');
+		var currentCompanyName = null;
+		if (currentCompanyTag) {
+		  currentCompanyName = currentCompanyTag[0].textContent.trim();
+		  contact.currentCompanyName = currentCompanyName;
+		}
         // Parse companies
 		$('a[data-field="experience_company_logo"].optional-action-target-wrapper').each(function(i) {
 			var companyEle = this;
@@ -217,32 +234,44 @@ function parseSocialReactor() {
 }
 
 function parseCompany() {
-	const reg = /urn:li:fsd_company:(\d*)/g ;
-	var companyIds = [...document.body.textContent.matchAll(reg)].map(function(i) {return i[1]});
-	const counter = {};
-	companyIds.forEach(ele => {
-	    if (counter[ele]) {
-			counter[ele] += 1;
-		} else {
-			counter[ele] = 1;
-		}
-	});
-	let id = null;
-	let highestValue = -Infinity;
-	for (const key in counter) {
-	  if (counter[key] > highestValue) {
-        id = key;
-	    highestValue = counter[key];
-      }
-	}
-
-	if (!id) return
-
-    var url = document.URL;
-	var alias = url.slice(33).split('/')[0];
+	var name = $('h1.org-top-card-summary__title').text().trim();
+	var id = null
 
     browser.storage.local.get().then(function (storage) {
-	  if (! (id in storage.lk_companies)) {
+	  var company = findCompanyByName(name, storage);
+	  if (company) id = company.id
+
+      if (! id) {
+	    const reg = /urn:li:fsd_company:(\d*)/g ;
+	    var companyIds = [...document.body.textContent.matchAll(reg)].map(function(i) {return i[1]});
+	    const counter = {};
+	    companyIds.forEach(ele => {
+	        if (counter[ele]) {
+	    		counter[ele] += 1;
+	    	} else {
+	    		counter[ele] = 1;
+	    	}
+	    });
+	    let id = null;
+	    let highestValue = -Infinity;
+	    for (const key in counter) {
+	      if (counter[key] > highestValue) {
+            id = key;
+	        highestValue = counter[key];
+          }
+	    }
+	  }
+
+	  if (!id) {
+	    console.log(`Cannot find company ${name} (${id})`)
+	    return
+	  }
+
+      var url = document.URL;
+	  var alias = url.slice(33).split('/')[0];
+
+      if (company) {
+      } else if (! (id in storage.lk_companies)) {
 	  	company = {id: id, url: url};
 	  } else {
 	  	company = storage.lk_companies[id];
@@ -273,11 +302,11 @@ function parseCompany() {
 	});
 }
 
-const seenCompanyPeople = []
 
 function parseCompanyPeople() {
+  var seenCompanyPeople = []
   var url = document.URL;
-  var aliasId = url.slice(33).split('/')[0];
+  var aliasId = url.slice(33).split('/')[0].split('?')[0];
 
   browser.storage.local.get().then(function (storage) {
     if (! (aliasId in storage.lk_company_aliases)) return
@@ -290,9 +319,13 @@ function parseCompanyPeople() {
     contactTags.each(function(i) {
 	  this.id = i;
 	  var contentTag = $(`#${i}`);
-	  var aTag = contentTag.find('a')[0];
+
+	  var aTags = contentTag.find('a');
+	  if (! aTags.length) return
+	  var aTag = aTags[0];
+
 	  var contactUrl = aTag.href.split('?')[0];
-	  var contactId = contactUrl.split('/in/')[1];
+	  var contactId = decodeURIComponent(contactUrl.split('/in/')[1]);
 
       if (seenCompanyPeople.includes(contactId)) return
 
@@ -501,7 +534,76 @@ function parseMyNetworkConnection() {
   });
 }
 
+const seenNotifications = []
+function parseNotifications() {
+  var notifTags = $('section article');
+  browser.storage.local.get().then(function (storage) {
+    notifTags.each(function(i) {
+	  var contentTag = $(this);
+	  var aTag = contentTag.find('a')[0];
+      var shortUrl = aTag.href;
+      var url = aTag.href;
+	  if (! url.startsWith('https://')) url = 'https://www.linkedin.com' + shortUrl;
+
+	  if (url.includes('/in/')) {
+        var contact = null;
+	    var id = decodeURIComponent(shortUrl.split('/in/')[1]);
+
+		if (seenNotifications.includes(id)) return
+
+        if (id in storage.lk_contacts) {
+          contact = storage.lk_contacts[id];
+	      contact.url = url
+        } else {
+          contact = {
+            id: id,
+            url: url,
+          };
+	      contact.name = contentTag.find('strong')[0].textContent.trim();
+          var imgTag = contentTag.find('img');
+	      if (imgTag.length) contact.img = imgTag[0].src;
+
+		  seenNotifications.push(id);
+		  storage.lk_contacts[id] = contact;
+        }
+	  } else if (url.includes('/company/')) {
+        var company = null;
+	    var id = decodeURIComponent(shortUrl.split('/company/')[1]);
+
+		if (seenNotifications.includes(id)) return
+
+        if (id in storage.lk_companies) {
+          company = storage.lk_companies[id];
+	      company.url = url
+        } else {
+          company = {
+            id: id,
+            url: url,
+          };
+	      company.name = contentTag.find('strong')[0].textContent.trim();
+          var imgTag = contentTag.find('img');
+	      if (imgTag.length) company.img = imgTag[0].src;
+
+		  seenNotifications.push(id);
+		  if (/^\d+$/.test(id)) {
+		    storage.lk_companies[id] = company;
+		  } else {
+			if (id in storage.lk_company_aliases) {
+			  var destId = storage.lk_company_aliases[id];
+			  storage.lk_companies[destId] = company;
+			} else {
+			  storage.lk_company_aliases[id] = company;
+			}
+		  }
+        }
+	  }
+	})
+    browser.storage.local.set(storage);
+  });
+}
+
 addEventListener("scrollend", (event) => {
+	var url = document.URL.split('?')[0];
     if (document.URL == "https://www.linkedin.com/feed/") {
         parseFeed()
         parseComments()
@@ -518,10 +620,17 @@ addEventListener("scrollend", (event) => {
         parseCompany()
     }
     if (
-	  document.URL.startsWith('https://www.linkedin.com/company/') &&
-	  document.URL.endsWith('/people/')
+	  url.startsWith('https://www.linkedin.com/company/') &&
+	  url.endsWith('/people/')
 	) {
         parseCompanyPeople()
+    }
+    if (
+	  document.URL.startsWith('https://www.linkedin.com/company/') &&
+	  document.URL.includes('/posts/')
+	) {
+        parseReactors();
+		parseComments();
     }
     if (document.URL.startsWith('https://www.linkedin.com/posts/')) {
         parseCompany()
@@ -531,5 +640,8 @@ addEventListener("scrollend", (event) => {
     }
     if (document.URL.startsWith('https://www.linkedin.com/mynetwork/invite-connect/connections/')) {
         parseMyNetworkConnection()
+    }
+    if (document.URL.startsWith('https://www.linkedin.com/notifications')) {
+		parseNotifications();
     }
 });
