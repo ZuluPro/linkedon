@@ -94,21 +94,55 @@ function showContacts(contacts, storage) {
 
 	  // Contact
       trContent += '<td>';
+	  if (contact.website) {
+        var websiteText = contact.website.split('//')[1];
+	    trContent += `<a class="badge text-bg-primary" target="_blank" href="${contact.website}"><i class="bi bi-link-45deg"></i> ${websiteText}</a> `
+	  }
+	  if (contact.blog) {
+        var websiteText = contact.blog.split('//')[1];
+	    trContent += `<a class="badge text-bg-primary" target="_blank" href="${contact.blog}"><i class="bi bi-link-45deg"></i> ${websiteText}</a> `
+	  }
+	  if (contact.companyWebsite) {
+        var websiteText = contact.companyWebsite.split('//')[1];
+	    trContent += `<a class="badge text-bg-primary" target="_blank" href="${contact.CompanyWebsite}"><i class="bi bi-link-45deg"></i> ${websiteText}</a> `
+	  }
 	  if (contact.email) {
-	    trContent += `<a class="badge text-bg-primary" href="mailto:${contact.email}">${contact.email}</a>`
+	    trContent += `<a class="badge text-bg-primary" href="mailto:${contact.email}"><i class="bi bi-envelope"></i> ${contact.email}</a> `
 	  }
 	  if (contact.phoneMobile) {
-	    trContent += `<a class="badge text-bg-primary" href="tel:${contact.phoneMobile}">Mobile: ${contact.phoneMobile}</a>`
+	    trContent += `<a class="badge text-bg-primary" href="tel:${contact.phoneMobile}"><i class="bi bi-phone"></i> ${contact.phoneMobile}</a> `
 	  }
 	  if (contact.phone) {
-	    trContent += `<a class="badge text-bg-primary" href="tel:${contact.phone}">${contact.phone}</a>`
+	    trContent += `<a class="badge text-bg-primary" href="tel:${contact.phone}"><i class="bi bi-telephone"></i> ${contact.phone}</a> `
+	  }
+	  if (contact.icq) {
+	    trContent += `<a class="badge text-bg-primary" target="_blank" href="${contact.icq}"><i class="bi bi-chat"></i> ${contact.icq}</a> `
+	  }
+	  if (contact.twitter) {
+        var websiteText = contact.twitter.split('//')[1];
+	    trContent += `<a class="badge text-bg-primary" target="_blank" href="${contact.twitter}"><i class="bi bi-twitter"></i> ${websiteText}</a> `
+	  }
+	  if (contact.skype) {
+	    trContent += `<a class="badge text-bg-primary" href="skype:${contact.skype}"><i class="bi bi-skype"></i> ${contact.skype}</a> `
+	  }
+	  if (contact.github) {
+        var websiteText = contact.github.split('//')[1];
+	    trContent += `<a class="badge text-bg-primary" target="_blank" href="${contact.github}"><i class="bi bi-github"></i> ${websiteText}</a> `
+	  }
+	  if (contact.kaggle) {
+        var websiteText = contact.kaggle.split('//')[1];
+	    trContent += `<a class="badge text-bg-primary" target="_blank" href="${contact.kaggle}"><i class="bi bi-kaggle"></i> ${websiteText}</a> `
+	  }
+	  if (contact.huggingface) {
+        var websiteText = contact.huggingface.split('//')[1];
+	    trContent += `<a class="badge text-bg-primary" target="_blank" href="${contact.huggingface}"><i class="bi bi-huggingface"></i> ${websiteText}</a> `
 	  }
       trContent += '</td>';
 
 	  // ID
       trContent += '<td>';
-      trContent += `ID:${contact.id}`;
-	  trContent += `${(contact.aliases || []).join(" ")}`;
+      trContent += `<span class="badge text-bg-primary text-break"><i class="bi bi-linkedin"> ${contact.id}</span>`;
+	  // trContent += `${(contact.aliases || []).join(" ")}`;
       trContent += '</td>';
 	  trTag.innerHTML = trContent
 			// <button onclick="deleteContact(${contact.id})">x</button>
@@ -129,6 +163,11 @@ function updateContacts() {
   var newUrl = document.URL.split('?')[0] + "?";
 
   filter.text = $('#navForm [name="text"]').val();
+  if (filter.text) {
+    var inputText = $('#navForm [name="text"]');
+    newUrl += `text=${inputText.val()}&`
+  }
+
   var checkboxKeys = ['premium', 'verified', 'topVoice']
   for (var i in checkboxKeys) {
 	var key = checkboxKeys[i];
@@ -162,7 +201,6 @@ for (var i in checkboxKeys) {
 	filter[key] = true;
   }
 }
-//
 // Display triggers
 $('#navForm input').on('keyup', function (e) {
   updateContacts();

@@ -162,6 +162,37 @@ function parsePerson() {
 		  } else if (fieldText.startsWith('Connected')) {
 			  rawDate = $(this).find('span').text().trim();
 			  contact.connectedSince = new Date(Date.parse(rawDate));
+		  } else if (fieldText.startsWith('IM')) {
+			$(this).find('li').each(function(i) {
+			  var imText = this.textContent.trim();
+			  if (imText.includes('Google Talk')) {
+			    contact.googleTalk = imText.split(" ")[0]
+			  } else if (imText.includes('Skype')) {
+			    contact.skype = imText.split(" ")[0]
+			  } else if (imText.includes('ICQ')) {
+			    contact.icq = imText.split(" ")[0]
+			  }
+			})
+		  } else if (fieldText.startsWith('Website')) {
+			$(this).find('li').each(function(i) {
+			  var webText = this.textContent.trim();
+			  var aTag = $(this).find('a');
+			  if (webText.includes('Personal')) {
+			    contact.website = aTag[0].href;
+			  } else if (webText.includes('Blog')) {
+			    contact.blog = aTag[0].href;
+			  } else if (webText.includes('Company')) {
+			    contact.companyWebsite = aTag[0].href;
+			  } else if (webText.includes('github.com')) {
+			    contact.github = aTag[0].href;
+			  } else if (webText.includes('kaggle.com')) {
+			    contact.kaggle = aTag[0].href;
+			  } else if (webText.includes('huggingface.co')) {
+			    contact.huggingface = aTag[0].href;
+			  } else if (webText.includes('Twitter')) {
+			    contact.twitter = aTag[0].href;
+			  }
+			})
 		  }
 		});
 
@@ -169,7 +200,7 @@ function parsePerson() {
 
 		var currentCompanyTag = $('button[aria-label^="Current company: "]');
 		var currentCompanyName = null;
-		if (currentCompanyTag) {
+		if (currentCompanyTag.length) {
 		  currentCompanyName = currentCompanyTag[0].textContent.trim();
 		  contact.currentCompanyName = currentCompanyName;
 		}

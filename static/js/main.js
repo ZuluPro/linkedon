@@ -56,17 +56,14 @@ function handleScroll() {
     const navbarHeight = document.querySelector('.navbar').offsetHeight;
 
 	var newOffset = Math.round(navbarHeight + window.scrollY - 83);
-	console.log(newOffset, window.scrollY)
 
-		tableHeader.style.setProperty('top', `${newOffset}px`)
+	tableHeader.style.setProperty('top', `${newOffset}px`)
     // if (tableHeader.getBoundingClientRect().top < window.screen.height ) {
     if (window.scrollY > 300) {
         tableHeader.classList.add('sticky-header');
-		console.log('+')
     } else {
         tableHeader.classList.remove('sticky-header');
 		tableHeader.style.removeProperty('top');
-		console.log('-')
     }
 }
 
