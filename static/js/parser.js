@@ -156,7 +156,7 @@ function parsePerson() {
 
 		var currentCompanyName = $('button[aria-label^="Current company: "]')[0].textContent.trim();
 		contact.currentCompanyName = currentCompanyName;
-
+        // Parse companies
 		$('a[data-field="experience_company_logo"].optional-action-target-wrapper').each(function(i) {
 			var companyEle = this;
 			if (! companyEle.href.startsWith('https://www.linkedin.com/company/')) {
@@ -187,6 +187,21 @@ function parsePerson() {
 			browser.storage.local.set(storage);
 
 		});
+        // Parse sections
+		$('section.artdeco-card').each(function(i) {
+			this.id = i;
+			sectionTag = $(`#${i}`);
+			var rawTextStart = this.textContent.trim().split(' ')[0].trim();
+			if (rawTextStart.startsWith('Activity')) {
+				var followers = sectionTag.find('.pvs-header__optional-link').text().trim().split(" ")[0].replace(',', '');
+				contact.followers = followers;
+			}
+
+			browser.storage.local.set(storage);
+
+		});
+
+
 		browser.storage.local.set(storage);
 	})
 }
@@ -229,7 +244,7 @@ function parseCompany() {
 	  }
 
 	  storage.lk_company_aliases[alias] = {id: id};
-	  company.img = $(".org-top-card-primary-content__logo-container img")[0].src.split('?')[0] 
+	  company.img = $(".org-top-card-primary-content__logo-container img")[0].src;
 	  company.name = $('h1').text().trim();
 	  
 	  var tagLine = $('.org-top-card-summary__tagline').text().trim();
