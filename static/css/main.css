@@ -40,3 +40,5 @@ li.select2-selection__choice {
   border-width: 1px;
   border-radius: 3px;
 }
+
+.handHover:hover { cursor: pointer; }

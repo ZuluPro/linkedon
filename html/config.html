@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Configuration - LinkedOn</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link type="text/css" rel="stylesheet" href="/static/css/bootstrap.css" />
+    <link type="text/css" rel="stylesheet" href="/static/css/bootstrap-icons.css" />
+    <link href="/static/select2/select2.css" rel="stylesheet" />
+  </head>
+
+  <body class="bg-dark">
+    <div id="app">
+
+      <nav class="navbar bg-body-tertiary sticky-top bg-dark navbar-expand-lg" data-bs-theme="dark">
+        <div class="container-fluid">
+
+          <a class="navbar-brand" href="#">
+            <img src="/static/img/icon256.png" alt="LinkedOn" width="30" height="30" class="d-inline-block align-text-top">
+
+          </a>
+
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+              <a class="nav-link" aria-current="page" href="/html/contacts.html">Contact</a>
+              <a class="nav-link" aria-current="page" href="/html/companies.html">Companies</a>
+              <a class="nav-link active" aria-current="page" href="/html/config.html"><i class="bi bi-gear"></i></a>
+            </div>
+          </div>
+
+        </div>
+      </nav>
+
+      <div class="container text-light">
+        <h1 class="mt-4">Configuration</h1>
+
+        <h2>General</h2>
+        <div class="mb-3 row">
+          <label class="form-check-label col-sm-2 col-form-label" for="parserEnabled">
+            Working
+          </label>
+          <div class="col-sm-10 form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="parserEnabled">
+            <p>Enable parsing during navigaion.</p>
+          </div>
+        </div>
+
+
+        <h2>Data</h2>
+
+        <p>
+          <a href="/html/contacts.html">
+            <span class="contactCount"></span> contacts
+          </a>
+          <i class="bi bi-download contactDownloadBtn"></i>
+        </p>
+
+        <p>
+          <a href="/html/companies.html">
+            <span class="companyCount"></span> companies
+          </a>
+          <i class="bi bi-download conmpanyDownloadBtn"></i>
+        </p>
+
+        <p>
+          <a href="#" class="backupBtn">
+            Backup
+            <i class="bi bi-download"></i>
+          </a>
+        </p>
+
+      </div>
+
+    </div>
+
+    <script src="/static/js/jquery.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/select2/select2.js"></script>
+    <script src="/static/js/config.js"></script>
+    <script src="/static/js/common.js"></script>
+    <script src="/static/js/main.js"></script>
+
+  </body>
+</html>

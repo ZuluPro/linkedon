@@ -279,8 +279,6 @@ console.log(newUrl)
 
 // Startup
 const url = new URL(document.URL);
-const filter = {}
-const order = {};
 
 $(function() {
   filter.text = url.searchParams.get('text');

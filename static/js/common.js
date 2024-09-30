@@ -1,3 +1,6 @@
+const filter = {}
+const order = {};
+
 function getContacts(storage, filter, order) {
   var filter = filter || {}
   var order = order || {}
@@ -121,3 +124,36 @@ function downloadStorage() {
     downloadBlob(blob, 'live-likedin.json');
   });
 }
+
+$('#parserEnabled').on('change', function (e) {
+  inputTag = $(this);
+  isOn = inputTag.prop('checked');
+  browser.storage.local.get().then(function (storage) {
+    updateConfig(storage, 'parserEnabled', isOn);
+    refreshConfig(storage);
+  });
+});
+$('.contactDownloadBtn').on('click', function (e) {
+  downloadContactCsv(filter, order);
+});
+$('.companyDownloadBtn').on('click', function (e) {
+  downloadCompanyCsv(filter, order);
+});
+$(".backupBtn").on("click", function(e) {
+  downloadStorage();
+});
+
+function setUpParserEnabledCheckbox(storage) {
+  parserEnabled = storage.config.parserEnabled;
+  $(`#parserEnabled`).prop('checked', parserEnabled);
+  updateConfig(storage, 'parserEnabled', parserEnabled)
+}
+
+$(function() {
+  browser.storage.local.get().then(function (storage) {
+    setUpParserEnabledCheckbox(storage);
+    $('.contactCount').text(Object.keys(storage.lk_contacts).length);
+    $('.companyCount').text(Object.keys(storage.lk_companies).length);
+  });
+
+});
