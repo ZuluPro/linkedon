@@ -35,7 +35,7 @@
   ],
 
   "browser_action": {
-    "default_title": "Live LinkedIn",
+    "default_title": "LinkedOn",
     "default_popup": "html/popup.html",
 	"default_icon": {
 		"256": "static/img/icon256.png"

@@ -1,25 +1,23 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Live Linkedin</title>
+    <title>LinkedOn</title>
     <link type="text/css" rel="stylesheet" href="/static/css/bootstrap.css" />
+    <link type="text/css" rel="stylesheet" href="/static/css/bootstrap-icons.css" />
   </head>
+
   <body>
     <div class="list-group">
-      <div id="homeBtn" class="list-group-item list-group-item-action active">Live Linkedin</div>
-      <div class="list-group-item list-group-item-action">
-        <span id="contactBtn">Contacts</span>
-        <button id="contactDownloadBtn" class="btn btn-sm btn-outline-primary">CSV</button>
-      </div>
-      <div class="list-group-item list-group-item-action">
-        <span id="companyBtn">Companies</span>
-        <button id="companyDownloadBtn" class="btn btn-sm btn-outline-primary">CSV</button>
-      </div>
+      <div id="homeBtn" class="list-group-item list-group-item-action active">LinkedOn</div>
+      <div id="contactItem" class="list-group-item list-group-item-action"></div>
+      <div id="companyItem" class="list-group-item list-group-item-action"></div>
       <div class="list-group-item list-group-item-action">
         <span id="backupBtn">Backup</span>
       </div>
     </div>
 
+    <script src="/static/js/jquery.js"></script>
+    <script src="/static/js/common.js"></script>
     <script src="/static/js/popup.js"></script>
   </body>
 </html>
