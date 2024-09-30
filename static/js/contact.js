@@ -214,8 +214,8 @@ $('#navForm input[type="checkbox"]').on('change', function (e) {
   setUrlFromParams();
   updateContacts();
 });
-$('#navForm #filterFollowers').on('change', function (e) {
-  filter.follower = this.value;
+$('#navForm input[type="number"]').on('change', function (e) {
+  filter[this.name] = this.value;
   setUrlFromParams();
   updateContacts();
 });
@@ -247,6 +247,11 @@ function setUrlFromParams() {
   filter.followers = $('#navForm [name="followers"]').val();
   if (filter.followers) {
     paramStr += `followers=${filter.followers}&`
+  }
+
+  filter.degree = $('#navForm [name="degree"]').val();
+  if (filter.degree) {
+    paramStr += `degree=${filter.degree}&`
   }
 
   filter.company = $('#navForm [name="company"]').val();

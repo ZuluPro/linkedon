@@ -20,8 +20,15 @@ function getContacts(storage, filter, order) {
 	  }
 
 	  if (filter.followers) {
-         var followers = contact.followers || 0;
-         if (followers <= filter.followers * 1000) keep = false;
+        var followers = contact.followers || 0;
+        if (followers <= filter.followers * 1000) keep = false;
+	  }
+
+      var filterDegree = filter.degree;
+      if (filterDegree == '0') filterDegree = null;
+	  if (filterDegree) {
+        var degree = (contact.degree || '4')[0];
+        if (degree != filterDegree) keep = false;
 	  }
 
 	  if (filter.verified) {
