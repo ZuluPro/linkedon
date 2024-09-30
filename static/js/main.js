@@ -55,7 +55,7 @@ function handleScroll() {
     const tableHeader = document.querySelector('.table thead');
     const navbarHeight = document.querySelector('.navbar').offsetHeight;
 
-	var newOffset = Math.round(navbarHeight + window.scrollY - 83);
+	var newOffset = Math.round(navbarHeight + window.scrollY - 100);
 
 	tableHeader.style.setProperty('top', `${newOffset}px`)
     // if (tableHeader.getBoundingClientRect().top < window.screen.height ) {
