@@ -5,3 +5,33 @@
   position: sticky;
   z-index: 10;
 }
+span.select2-selection.select2-selection--multiple {
+  background: #212529;
+}
+.select2-results__option.select2-results__option--selectable.select2-results__option--highlighted {
+  background: #212529;
+}
+.select2-results__option.select2-results__option--selectable {
+  background: #2C3034;
+  color: #9a9fa3;
+}
+li.select2-selection__choice {
+  background-color: #2C3034 !important;
+}
+.select2-selection__choice__display {
+  background-color: #2C3034;
+  color: #9a9fa3;
+}
+.select2-selection__choice__remove:hover {
+  background-color: #2C3034 !important;
+  color: #9F9faf;
+}
+.select2-search__field {
+  height: 50px !important;
+  max-height: 60px;
+}
+.select2-search__field::-webkit-input-placeholder {
+  height: 50px !important;
+  line-height: 30px;
+  margin-top: 50px
+}

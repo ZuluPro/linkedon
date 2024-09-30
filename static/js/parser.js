@@ -117,6 +117,8 @@ function parsePerson() {
     var id = decodeURIComponent(document.URL.slice(28).replace('/overlay/contact-info/', '').replace('/', ''));
     browser.storage.local.get().then(function (storage) {
 		var contact = storage['lk_contacts'][id];
+		var longNameTag = $('h1.text-heading-xlarge')[0]
+		if (! longNameTag) return // Wait loading
 		var longName = $('h1.text-heading-xlarge')[0].textContent.trim();
 		if (! contact) {
 			contact = {id: id, name: longName};

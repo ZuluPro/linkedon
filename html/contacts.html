@@ -35,28 +35,29 @@
 
           <form id="navForm" class="d-flex" role="search">
 
-            <div id="filterCompanyContainer" class="">
-              <select name="company" class="form-control bg-dark" multiple="multiple" id="filterCompany"></select>
+            <div class="input-group mx-2">
+              <input name="text" type="text" class="form-control" placeholder="Search by text" aria-label="Text">
             </div>
 
-            <div class="form-check form-switch">
+            <div class="form-check form-switch mx-1">
               <input name="topVoice" class="form-check-input" type="checkbox" role="switch" id="filterTopVoice">
               <label class="form-check-label text-light" for="filterTopVoice">Only <i class="bi bi-megaphone"></i></label>
             </div>
 
-            <div class="form-check form-switch">
+            <div class="form-check form-switch mx-1">
               <input name="premium" class="form-check-input" type="checkbox" role="switch" id="filterPremium">
               <label class="form-check-label text-light" for="filterPremium">Only <i class="bi bi-linkedin"></i></label>
             </div>
 
-            <div class="form-check form-switch">
+            <div class="form-check form-switch mx-1">
               <input name="verified" class="form-check-input" type="checkbox" role="switch" id="filterVerified">
               <label class="form-check-label text-light" for="filterVerified">Only <i class="bi bi-shield-check"></i></label>
             </div>
 
-            <div class="input-group">
-              <input name="text" type="text" class="form-control" placeholder="Search text" aria-label="Text">
+            <div id="filterCompanyContainer" class="mx-1">
+              <select name="company" class="form-control" multiple="multiple" id="filterCompany"></select>
             </div>
+
           </form>
         </div>
       </nav>
