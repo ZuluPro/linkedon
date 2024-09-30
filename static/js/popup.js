@@ -6,6 +6,15 @@ document.getElementById("backupBtn").addEventListener("click", () => {
   downloadStorage();
 });
 
+$('#parserEnabled').on('change', function (e) {
+  inputTag = $(this);
+  isOn = inputTag.prop('checked');
+  browser.storage.local.get().then(function (storage) {
+    updateConfig(storage, 'parserEnabled', isOn);
+    refreshConfig(storage);
+  });
+});
+
 $(function() {
   var contactTag = $('#contactItem');
   browser.storage.local.get().then(function (storage) {
@@ -45,5 +54,8 @@ $(function() {
     	downloadCompanyCsv();
     });
 
+	parserEnabled = storage.config.parserEnabled;
+  	$(`#parserEnabled`).prop('checked', parserEnabled);
+    updateConfig(storage, 'parserEnabled', parserEnabled)
   });
 });

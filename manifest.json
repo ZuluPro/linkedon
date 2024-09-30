@@ -20,6 +20,7 @@
   "background": {
     "scripts": [
 	  "static/js/background.js",
+      "static/js/config.js",
 	  "static/js/parser.js"
 	]
   },
@@ -29,6 +30,7 @@
 	  "matches": ["https://www.linkedin.com/*"],
 	  "js": [
 		"static/js/jquery.js",
+		"static/js/config.js",
 		"static/js/parser.js"
 	  ]
 	}

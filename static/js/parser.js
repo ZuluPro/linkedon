@@ -22,6 +22,7 @@ function checkStoredSettings(storage) {
     "lk_companies",
     "lk_company_aliases",
     "lk_tmp_company_aliases",
+    "config",
   ];
   default_keys.map(function(key) {
       if (!storage[key]) {
@@ -86,6 +87,7 @@ function parseFeed() {
         }
         var url = href.split('?')[0];
         var id = url.split('/in/')[1];
+
 		var contact = null;
         if (id in storage.lk_contacts) {
 			contact = storage.lk_contacts[id];
@@ -96,17 +98,15 @@ function parseFeed() {
             };
         }
         var name = contactTag.find('.update-components-actor__name span span')[0].textContent
+        contact.name = name
+
         var image_url = contactTag.find('img')[0].src;
+        contact.img = image_url
+
         // var degree = $(contact).find('.update-components-actor__supplementary-actor-info')[0].textContent.replace(" • ", ""); 
         var desc = contactTag.find('.update-components-actor__description')[0].children[0].textContent.trim();
-        contact = {
-			"id": id,
-            "name": name,
-            'img': image_url,
-			'url': url,
-            // "degree": degree,
-            "description": desc,
-        };
+		contact.description = desc;
+
         storage.lk_contacts[id] = contact
         browser.storage.local.set(storage);
       }
@@ -134,13 +134,15 @@ function parsePerson() {
 		$('span.t-bold').each(function (t) {
 			var text = this.parentElement.textContent.trim();
 			if (text.includes('followers')) {
-				contact.followers = text.split(' ')[0].replace(',', '');
+				var followers = text.split(' ')[0].replace(',', '').trim();
+				if (followers) contact.followers = followers
 			}
 		});
 		$('.distance-badge span.visually-hidden').each(function (t) {
 			var text = this.parentElement.textContent.trim();
 			if (text.includes('degree connection')) {
-				contact.degree = text.split(' ')[0];
+				var degree = text.split(' ')[0].trim();
+				if (degree) contact.degree = degree
 			}
 		});
 		if (! contact.name) {
@@ -244,7 +246,7 @@ function parsePerson() {
 			var rawTextStart = this.textContent.trim().split(' ')[0].trim();
 			if (rawTextStart.startsWith('Activity')) {
 				var followers = sectionTag.find('.pvs-header__optional-link').text().trim().split(" ")[0].replace(',', '');
-				contact.followers = followers;
+				if (followers) contact.followers = followers;
 			} else if (rawTextStart.startsWith('About')) {
 				if (! rawTextStart.endsWith('see more')) {
 					var text = sectionTag.find('.full-width span[aria-hidden="true"]').text().trim();
@@ -636,6 +638,9 @@ function parseNotifications() {
 }
 
 addEventListener("scrollend", (event) => {
+  browser.storage.local.get().then(function (storage) {
+	if (! config.parserEnabled) return
+
 	var url = document.URL.split('?')[0];
     if (document.URL == "https://www.linkedin.com/feed/") {
         parseFeed()
@@ -677,4 +682,5 @@ addEventListener("scrollend", (event) => {
     if (document.URL.startsWith('https://www.linkedin.com/notifications')) {
 		parseNotifications();
     }
+  })
 });
