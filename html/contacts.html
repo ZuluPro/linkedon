@@ -7,6 +7,7 @@
 
     <link type="text/css" rel="stylesheet" href="/static/css/bootstrap.css" />
     <link type="text/css" rel="stylesheet" href="/static/css/bootstrap-icons.css" />
+    <link href="/static/select2/select2.css" rel="stylesheet" />
     <link type="text/css" rel="stylesheet" href="/static/css/main.css" />
   </head>
 
@@ -33,6 +34,10 @@
           </div>
 
           <form id="navForm" class="d-flex" role="search">
+
+            <div id="filterCompanyContainer" class="">
+              <select name="company" class="form-control bg-dark" multiple="multiple" id="filterCompany"></select>
+            </div>
 
             <div class="form-check form-switch">
               <input name="topVoice" class="form-check-input" type="checkbox" role="switch" id="filterTopVoice">
@@ -88,6 +93,7 @@
 
     <script src="/static/js/jquery.js"></script>
     <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/select2/select2.js"></script>
     <script src="/static/js/main.js"></script>
     <script src="/static/js/contact.js"></script>
 

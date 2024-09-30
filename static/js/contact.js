@@ -31,14 +31,20 @@ function getContacts(storage, filter, order) {
          if (! contact.topVoice) keep = false;
 	  }
 
+	  if (filter.company && filter.company.length) {
+         if (! contact.currentCompany) {
+           keep = false;
+         } else if (! filter.company.includes(contact.currentCompany)) {
+           keep = false;
+	     }
+      }
+
 	  if (keep) contacts.push(contact);
   }
   
   var orderKeys = ['followers', 'degree', 'name']
   for (var keyId in orderKeys) {
     var key = orderKeys[keyId];
-      console.log(key, order)
-      console.log(key in order)
     if (! (key in order)) continue
     contacts = contacts.sort(function(a, b) {
       var sort = order[key];
@@ -190,19 +196,6 @@ function updateContacts() {
     newUrl += `text=${inputText.val()}&`
   }
 
-  var checkboxKeys = ['premium', 'verified', 'topVoice']
-  for (var i in checkboxKeys) {
-	var key = checkboxKeys[i];
-    var checkbox = $(`#navForm [name="${key}"]`);
-    // Then filter form form
-    filter[key] = checkbox.is(':checked');
-    // Update URL & inputs
-    checkbox.prop('checked', filter[key]);
-    if (filter[key]) {
-      newUrl += `${key}=on&`
-    }
-  }
-  window.history.pushState(newUrl, "Contacts", newUrl)
   // Do the job
   browser.storage.local.get().then(function (storage) {
 	var contacts = getContacts(storage, filter, order);
@@ -211,25 +204,78 @@ function updateContacts() {
 }
 
 // Set form values
-var url = new URL(document.URL);
-const filter = {
-  text: url.searchParams.get('text'),
-};
-var checkboxKeys = ['premium', 'verified', 'topVoice']
-for (var i in checkboxKeys) {
-  var key = checkboxKeys[i];
-  if (Boolean(url.searchParams.get(key))) {
-	$(`#navForm [name="${key}"]`).prop('checked', true);
-	filter[key] = true;
-  }
+function setUpCompanySelect() {
+
+  browser.storage.local.get().then(function (storage) {
+    var data = [];
+    for (var key in storage.lk_companies) {
+      var company = storage.lk_companies[key];
+      if (! company.name) continue;
+      data.push({
+        id: company.id,
+        text: company.name,
+        img: company.img,
+        tagLine: company.tagLine,
+      });
+    }
+    data = data.sort(function(a, b) {
+      return a.text.localeCompare(b.text);
+    });
+
+    var selectTag = $('#navForm [name="company"]');
+    for (var key in filter.company) {
+      var id = filter.company[key];
+console.log(id)
+      company = storage.lk_companies[id];
+      var option = new Option(company.name, company.id, true, true);
+      selectTag.append(option)
+    }
+
+    $('#navForm [name="company"]').select2({
+      data: data,
+      placeholder: "Filter by Company",
+      allowClear: true,
+      maximumSelectionLength: 2,
+	  width: 400,
+      templateResult: function (state) {
+        if (!state.img) return state.text;
+        return $(`<div class="row px-1">
+          <div class="col-2">
+            <img class="w-100" src="${state.img}">
+          </div>
+          <div class="col-10">
+            ${state.text}
+          </div>
+        </div>
+        `);
+      },
+      templateSelection: function(state) {
+        if (!state.id) return state.text;
+        return $(`
+            <img height="32" width="32" src="${state.img}">
+            <span>${state.text}</span>
+        `);
+      },
+    })
+  })
 }
-const order = {};
+
+$('#navForm select').on('change', function (e) {
+  filter.company = $(this).val();
+  setUrlFromParams();
+  updateContacts();
+});
 
 // Display triggers
 $('#navForm input').on('keyup', function (e) {
+  setUrlFromParams();
   updateContacts();
 });
 $('#navForm input[type="checkbox"]').on('change', function (e) {
+  inputTag = $(this);
+  filter[this.name] = inputTag.prop('checked')
+  inputTag.prop('checked', inputTag.prop('checked'));
+  setUrlFromParams();
   updateContacts();
 });
 
@@ -249,5 +295,55 @@ $('.tableSorter').on('click', function (e) {
     updateContacts();
 });
 
-// Display at startup
-updateContacts();
+function setUrlFromParams() {
+  var paramStr = '';
+
+  filter.text = $('#navForm [name="text"]').val();
+  if (filter.text) {
+    paramStr += `text=${filter.text}&`
+  }
+
+  filter.company = $('#navForm [name="company"]').val();
+  if (filter.company) {
+    for (var key in filter.company) {
+      var id = filter.company[key];
+      paramStr += `company=${id}&`
+    }
+  }
+
+  var checkboxKeys = ['premium', 'verified', 'topVoice']
+  for (var i in checkboxKeys) {
+	var key = checkboxKeys[i];
+    var checkbox = $(`#navForm [name="${key}"]`);
+    filter[key] = checkbox.is(':checked');
+    if (filter[key]) {
+      paramStr += `${key}=on&`
+    }
+  }
+
+  newUrl = url.href.split('?')[0] + '?' + paramStr
+console.log(newUrl)
+  window.history.pushState(newUrl, "Contacts", newUrl)
+}
+
+// Startup
+const url = new URL(document.URL);
+const filter = {}
+const order = {};
+
+$(function() {
+  filter.text = url.searchParams.get('text');
+  filter.company = url.searchParams.getAll('company');
+
+  var checkboxKeys = ['premium', 'verified', 'topVoice']
+  for (var i in checkboxKeys) {
+    var key = checkboxKeys[i];
+    if (Boolean(url.searchParams.get(key))) {
+  	  $(`#navForm [name="${key}"]`).prop('checked', true);
+  	  filter[key] = true;
+    }
+  }
+
+  setUpCompanySelect();
+  updateContacts();
+});
