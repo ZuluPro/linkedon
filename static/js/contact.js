@@ -195,14 +195,15 @@ console.log(id)
   })
 }
 
+
+// Display triggers
 $('#navForm select').on('change', function (e) {
   filter.company = $(this).val();
   setUrlFromParams();
   updateContacts();
 });
-
-// Display triggers
 $('#navForm input').on('keyup', function (e) {
+  filter[this.name] = this.value;
   setUrlFromParams();
   updateContacts();
 });
@@ -210,6 +211,11 @@ $('#navForm input[type="checkbox"]').on('change', function (e) {
   inputTag = $(this);
   filter[this.name] = inputTag.prop('checked')
   inputTag.prop('checked', inputTag.prop('checked'));
+  setUrlFromParams();
+  updateContacts();
+});
+$('#navForm #filterFollowers').on('change', function (e) {
+  filter.follower = this.value;
   setUrlFromParams();
   updateContacts();
 });
@@ -236,6 +242,11 @@ function setUrlFromParams() {
   filter.text = $('#navForm [name="text"]').val();
   if (filter.text) {
     paramStr += `text=${filter.text}&`
+  }
+
+  filter.followers = $('#navForm [name="followers"]').val();
+  if (filter.followers) {
+    paramStr += `followers=${filter.followers}&`
   }
 
   filter.company = $('#navForm [name="company"]').val();

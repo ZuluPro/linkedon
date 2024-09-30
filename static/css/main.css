@@ -31,3 +31,11 @@ li.select2-selection__choice {
   height: 50px !important;
   max-height: 60px;
 }
+#filterFollowers {
+  width: 50px;
+  color: #9F9faf;
+  background: #212529;
+  border-color: #495057;
+  border-width: 1px;
+  border-radius: 3px;
+}

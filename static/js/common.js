@@ -19,6 +19,11 @@ function getContacts(storage, filter, order) {
          if (tagLine.includes(text)) keep = true;
 	  }
 
+	  if (filter.followers) {
+         var followers = contact.followers || 0;
+         if (followers <= filter.followers * 1000) keep = false;
+	  }
+
 	  if (filter.verified) {
          if (! contact.verified) keep = false;
 	  }
