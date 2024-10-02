@@ -57,6 +57,9 @@ function showContacts(contacts, storage) {
 
 	  // Contact
       trContent += '<td>';
+
+      trContent += `<a class="badge text-bg-primary text-break"><i class="bi bi-linkedin" href="${contact.url}"></i> ${contact.id}</a> `;
+
 	  if (contact.website) {
         var websiteText = contact.website.split('//')[1];
 	    trContent += `<a class="badge text-bg-primary" target="_blank" href="${contact.website}"><i class="bi bi-link-45deg"></i> ${websiteText}</a> `
@@ -102,16 +105,8 @@ function showContacts(contacts, storage) {
 	  }
       trContent += '</td>';
 
-	  // ID
-      trContent += '<td>';
-      trContent += `<span class="badge text-bg-primary text-break"><i class="bi bi-linkedin"> ${contact.id}</span>`;
-	  // trContent += `${(contact.aliases || []).join(" ")}`;
-      trContent += '</td>';
 	  trTag.innerHTML = trContent
-			// <button onclick="deleteContact(${contact.id})">x</button>
-
       table.children[1].appendChild(trTag);
-      // document.getElementById("contactCount").innerHTML = `${contacts.length} contacts`
     }
 }
 function deleteContact(id) {
