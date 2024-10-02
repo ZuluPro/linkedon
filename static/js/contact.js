@@ -33,8 +33,11 @@ function showContacts(contacts, storage) {
       trContent += '<td>'
       trContent += `${contact.degree || ""}`
 	  if (contact.connectedSince) {
+		var connectedSince = contact.connectedSince;
+		if (connectedSince.toISOString) connectedSince = connectedSince.toISOString();
+		connectedSince = connectedSince.slice(0, 10)
         trContent += '<br>'
-        trContent += `<small>${contact.connectedSince.toISOString().slice(0, 10)}</small>`
+        trContent += `<small>${connectedSince}</small>`
 	  }
       trContent += '</td>'
 	  // TagLine
