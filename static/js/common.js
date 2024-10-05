@@ -17,6 +17,12 @@ function getContacts(storage, filter, order) {
 
 	  var keep = ! (filter.text)
 
+	  if (! filter.isArchived) {
+         if (contact.isArchived) continue;
+	  } else {
+         continue;
+      }
+
 	  if (text.length > 2) {
          if (name.includes(text)) keep = true;
          if (tagLine.includes(text)) keep = true;

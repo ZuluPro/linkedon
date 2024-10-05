@@ -6,7 +6,7 @@ function showContacts(contacts, storage) {
       contact.currentCompanyLogo = getCompanyLogo(contact.currentCompany, storage);
 
       var trTag = document.createElement("tr");
-      trTag.id = id;
+      trTag.id = contact.id;
 	  // ID
       trContent = ''
       trContent = `
@@ -40,10 +40,12 @@ function showContacts(contacts, storage) {
         trContent += `<small>${connectedSince}</small>`
 	  }
       trContent += '</td>'
+
 	  // TagLine
 	  var tagLine = contact.tagLine || contact.description || "";
 	  if (tagLine.length > 300) tagLine = tagLine.slice(0, 300) + "..."
       trContent += `<td>${tagLine}</td>`
+
 	  // Company
       trContent += '<td>';
 	  if (contact.currentCompany) {
@@ -106,6 +108,21 @@ function showContacts(contacts, storage) {
         var websiteText = contact.huggingface.split('//')[1];
 	    trContent += `<a class="badge text-bg-primary" target="_blank" href="${contact.huggingface}"><i class="bi bi-huggingface"></i> ${websiteText}</a> `
 	  }
+      trContent += '</td>';
+
+	  // Btns
+      trContent += '<td>';
+	  trContent += '<div class="input-group">';
+	  if (contact.isArchived) {
+	    trContent += `<button class="btn btn-secondary btn-sm btnUnarchiveContact" type="button" data-id="${contact.id}">`;
+	    trContent += '<i class="bi-unarchive"></i>';
+	    trContent += '</button>';
+	  } else {
+	    trContent += `<button class="btn btn-warning btn-sm btnArchiveContact" type="button" data-id="${contact.id}">`;
+	    trContent += '<i class="bi bi-archive"></i>';
+	    trContent += '</button>';
+	  }
+      trContent += '</duv>';
       trContent += '</td>';
 
 	  trTag.innerHTML = trContent
@@ -217,9 +234,23 @@ $('#navForm input[type="number"]').on('change', function (e) {
   setUrlFromParams();
   updateContacts();
 });
+$(document).on('click', '.btnArchiveContact', function (e) {
+  var tag = $(this);
+  var parentTag = tag.parent();
+  var contactId = tag.data('id');
+  browser.storage.local.get().then(function (storage) {
+	storage.lk_contacts[contactId].isArchived = true;
+    browser.storage.local.set(storage);
+  });
+  $(`#${contactId}`).remove();
+  var btnHtml = `<button class="btn btn-secondary btn-sm btnArchiveContact" type="button" data-id="${contact.id}">`;
+  btnHtml += '<i class="bi-unarchive"></i>';
+  btnHtml += '</button>';
+  parentTag.html(btnHtml);
+});
 
 // Order
-$('.tableSorter').on('click', function (e) {
+$(document).on('click', '.tableSorter', function (e) {
     var key = this.dataset.field;
     var value = this.dataset.order;
     if (value == '+') {
@@ -293,8 +324,5 @@ $(function() {
 
   setUpCompanySelect();
   updateContacts();
-});
 
-document.getElementById("contactDownloadBtn").addEventListener("click", () => {
-  downloadContactCsv(filter, order);
 });
