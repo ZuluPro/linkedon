@@ -20,7 +20,6 @@ function getContacts(storage, filter, order) {
 	  if (! filter.isArchived) {
          if (contact.isArchived) continue;
 	  } else {
-         continue;
       }
 
 	  if (text.length > 2) {

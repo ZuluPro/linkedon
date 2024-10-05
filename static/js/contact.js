@@ -1,3 +1,5 @@
+const checkboxKeys = ['premium', 'verified', 'topVoice', 'isArchived']
+
 function showContacts(contacts, storage) {
     var table = document.getElementById("contactTable");
     $('#contactTable tbody').empty();
@@ -114,8 +116,8 @@ function showContacts(contacts, storage) {
       trContent += '<td>';
 	  trContent += '<div class="input-group">';
 	  if (contact.isArchived) {
-	    trContent += `<button class="btn btn-secondary btn-sm btnUnarchiveContact" type="button" data-id="${contact.id}">`;
-	    trContent += '<i class="bi-unarchive"></i>';
+	    trContent += `<button class="btn btn-secondary btn-sm btnUnArchiveContact" type="button" data-id="${contact.id}">`;
+	    trContent += '<i class="bi-upload"></i>';
 	    trContent += '</button>';
 	  } else {
 	    trContent += `<button class="btn btn-warning btn-sm btnArchiveContact" type="button" data-id="${contact.id}">`;
@@ -242,9 +244,28 @@ $(document).on('click', '.btnArchiveContact', function (e) {
 	storage.lk_contacts[contactId].isArchived = true;
     browser.storage.local.set(storage);
   });
-  $(`#${contactId}`).remove();
-  var btnHtml = `<button class="btn btn-secondary btn-sm btnArchiveContact" type="button" data-id="${contact.id}">`;
-  btnHtml += '<i class="bi-unarchive"></i>';
+  if (filter.archive) {
+    $(`#${contactId}`).remove();
+  } else {
+    tag.remove();
+    var btnHtml = `<button class="btn btn-secondary btn-sm btnUnArchiveContact" type="button" data-id="${contact.id}">`;
+    btnHtml += '<i class="bi-upload"></i>';
+    btnHtml += '</button>';
+    parentTag.html(btnHtml);
+  }
+});
+$(document).on('click', '.btnUnArchiveContact', function (e) {
+	console.log(e)
+  var tag = $(this);
+  var parentTag = tag.parent();
+  var contactId = tag.data('id');
+  browser.storage.local.get().then(function (storage) {
+	storage.lk_contacts[contactId].isArchived = false;
+    browser.storage.local.set(storage);
+  });
+  tag.remove();
+  var btnHtml = `<button class="btn btn-warning btn-sm btnArchiveContact" type="button" data-id="${contact.id}">`;
+  btnHtml += '<i class="bi-archive"></i>';
   btnHtml += '</button>';
   parentTag.html(btnHtml);
 });
@@ -291,7 +312,6 @@ function setUrlFromParams() {
     }
   }
 
-  var checkboxKeys = ['premium', 'verified', 'topVoice']
   for (var i in checkboxKeys) {
 	var key = checkboxKeys[i];
     var checkbox = $(`#navForm [name="${key}"]`);
@@ -313,7 +333,6 @@ $(function() {
   filter.text = url.searchParams.get('text');
   filter.company = url.searchParams.getAll('company');
 
-  var checkboxKeys = ['premium', 'verified', 'topVoice']
   for (var i in checkboxKeys) {
     var key = checkboxKeys[i];
     if (Boolean(url.searchParams.get(key))) {
