@@ -1,4 +1,4 @@
-const checkboxKeys = ['premium', 'verified', 'topVoice', 'isArchived']
+const checkboxKeys = ['premium', 'verified', 'topVoice', 'isArchived', 'starred']
 
 function showContacts(contacts, storage) {
     var table = document.getElementById("contactTable");
@@ -124,7 +124,16 @@ function showContacts(contacts, storage) {
 	    trContent += '<i class="bi bi-archive"></i>';
 	    trContent += '</button>';
 	  }
-      trContent += '</duv>';
+	  if (contact.starred) {
+	    trContent += `<button class="btn btn-secondary btn-sm btnUnStarContact" type="button" data-id="${contact.id}">`;
+	    trContent += '<i class="bi bi-star"></i>';
+	    trContent += '</button>';
+	  } else {
+	    trContent += `<button class="btn btn-warning btn-sm btnStarContact" type="button" data-id="${contact.id}">`;
+	    trContent += '<i class="bi bi-star-fill"></i>';
+	    trContent += '</button>';
+	  }
+      trContent += '</div>';
       trContent += '</td>';
 
 	  trTag.innerHTML = trContent
@@ -177,7 +186,6 @@ function setUpCompanySelect() {
     var selectTag = $('#navForm [name="company"]');
     for (var key in filter.company) {
       var id = filter.company[key];
-console.log(id)
       company = storage.lk_companies[id];
       var option = new Option(company.name, company.id, true, true);
       selectTag.append(option)
@@ -255,7 +263,6 @@ $(document).on('click', '.btnArchiveContact', function (e) {
   }
 });
 $(document).on('click', '.btnUnArchiveContact', function (e) {
-	console.log(e)
   var tag = $(this);
   var parentTag = tag.parent();
   var contactId = tag.data('id');
@@ -268,6 +275,37 @@ $(document).on('click', '.btnUnArchiveContact', function (e) {
   btnHtml += '<i class="bi-archive"></i>';
   btnHtml += '</button>';
   parentTag.html(btnHtml);
+});
+$(document).on('click', '.btnStarContact', function (e) {
+  var tag = $(this);
+  var contactId = this.dataset.id;
+  browser.storage.local.get().then(function (storage) {
+	storage.lk_contacts[contactId].starred = true;
+    browser.storage.local.set(storage);
+  });
+  var btnHtml = `<button class="btn btn-secondary btn-sm btnUnStarContact" type="button" data-id="${contact.id}">`;
+  btnHtml += '<i class="bi-star"></i>';
+  btnHtml += '</button>';
+  parentElement = this.parentElement;
+  this.remove();
+  parentElement.innerHTML += btnHtml;
+});
+$(document).on('click', '.btnUnStarContact', function (e) {
+  var contactId = this.dataset.id;
+  browser.storage.local.get().then(function (storage) {
+	storage.lk_contacts[contactId].starred = false;
+    browser.storage.local.set(storage);
+  });
+  if (filter.star) {
+    $(`#${contactId}`).remove();
+  } else {
+    var btnHtml = `<button class="btn btn-warning btn-sm btnStarContact" type="button" data-id="${contact.id}">`;
+    btnHtml += '<i class="bi-star-fill"></i>';
+    btnHtml += '</button>';
+    parentElement = this.parentElement;
+    this.remove();
+    parentElement.innerHTML += btnHtml;
+  }
 });
 
 // Order

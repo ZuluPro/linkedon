@@ -19,8 +19,11 @@ function getContacts(storage, filter, order) {
 
 	  if (! filter.isArchived) {
          if (contact.isArchived) continue;
-	  } else {
-      }
+	  }
+
+	  if (filter.starred) {
+         if (! contact.starred) continue;
+	  }
 
 	  if (text.length > 2) {
          if (name.includes(text)) keep = true;
