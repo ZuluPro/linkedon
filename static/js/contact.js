@@ -2,6 +2,7 @@ const checkboxKeys = ['premium', 'verified', 'topVoice', 'isArchived', 'starred'
 
 function showContacts(contacts, storage) {
     var table = document.getElementById("contactTable");
+    $('.currentContactCount').html('<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>');
     $('#contactTable tbody').empty();
     for (var id in contacts) {
       var contact = contacts[id];
@@ -52,7 +53,7 @@ function showContacts(contacts, storage) {
       trContent += '<td>';
 	  if (contact.currentCompany) {
 	    trContent += `
-			  <a href="https://www.linkedin.com/company/${contact.currentCompany}" target="_blank">
+		  <a href="https://www.linkedin.com/company/${contact.currentCompany}" target="_blank">
                 <img src="${contact.currentCompanyLogo}" height="64" alt="${contact.currentCompany || ""}">
 			  </a>
 	    `;
@@ -65,7 +66,8 @@ function showContacts(contacts, storage) {
 	  // Contact
       trContent += '<td>';
 
-      trContent += `<a class="badge text-bg-primary text-break"><i class="bi bi-linkedin" href="${contact.url}"></i> ${contact.id}</a> `;
+	  var linkedinUrl = `https://www.linkedin.com/in/${contact.id}`
+      trContent += `<a class="badge text-bg-primary text-break" href="${linkedinUrl}" target="_blank"><i class="bi bi-linkedin"></i> ${contact.id}</a> `;
 
 	  if (contact.website) {
         var websiteText = contact.website.split('//')[1];
@@ -139,6 +141,7 @@ function showContacts(contacts, storage) {
 	  trTag.innerHTML = trContent
       table.children[1].appendChild(trTag);
     }
+    $('.currentContactCount').text(contacts.length);
 }
 function deleteContact(id) {
   browser.storage.local.get().then(function (storage) {
