@@ -1,2 +1,8 @@
+VERSION := $(shell cat VERSION)
+
 package:
-	zip -r -FS ../linkedon.zip * --exclude '*.git*'
+	mkdir -p build/
+	cd src && zip -r -FS ../build/$(VERSION).xpi * --exclude '*.swp'
+
+clean:
+	rm -f build/

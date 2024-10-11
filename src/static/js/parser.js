@@ -134,7 +134,7 @@ function parsePerson() {
 		$('span.t-bold').each(function (t) {
 			var text = this.parentElement.textContent.trim();
 			if (text.includes('followers')) {
-				var followers = text.split(' ')[0].replace(',', '').trim();
+				var followers = text.split(' ')[0].replace(/,/g, '').trim();
 				if (followers) contact.followers = followers
 			}
 		});
@@ -245,7 +245,7 @@ function parsePerson() {
 			sectionTag = $(`#${i}`);
 			var rawTextStart = this.textContent.trim().split(' ')[0].trim();
 			if (rawTextStart.startsWith('Activity')) {
-				var followers = sectionTag.find('.pvs-header__optional-link').text().trim().split(" ")[0].replace(',', '');
+				var followers = sectionTag.find('.pvs-header__optional-link').text().trim().split(" ")[0].replace(/,/g, '');
 				if (followers) contact.followers = followers;
 			} else if (rawTextStart.startsWith('About')) {
 				if (! rawTextStart.endsWith('see more')) {

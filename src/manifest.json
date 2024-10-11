@@ -48,5 +48,11 @@
     {
 	  "url": "html/home.html"
 	}
-  ]
+  ],
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "ext@linkedon"
+    }
+  }
 }
